@@ -21,37 +21,37 @@ const Home: React.FC = () => {
           </div>
 
           {/* Main Brand Headline */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Rretoriq</span>
-            <span className="block text-neutral-900 mt-2">Transform Your Communication Excellence</span>
+            <span className="block text-neutral-900 mt-3 text-2xl sm:text-3xl lg:text-4xl font-semibold">Transform Your Communication Excellence</span>
           </h1>
 
           {/* Brand Slogan */}
-          <div className="mb-8">
-            <p className="text-xl sm:text-2xl text-blue-700 font-bold italic tracking-wide">
+          <div className="mb-10">
+            <p className="text-lg sm:text-xl text-blue-700 font-semibold italic tracking-wide">
               "Where Words Meet Wisdom, Skills Meet Success"
             </p>
           </div>
 
           {/* Value Proposition */}
-          <p className="text-xl sm:text-2xl text-neutral-700 mb-16 max-w-4xl mx-auto leading-relaxed font-medium">
+          <p className="text-lg sm:text-xl text-neutral-700 mb-12 max-w-4xl mx-auto leading-relaxed">
             Unlock your potential with India's most advanced AI communication coach. 
             <span className="text-blue-600 font-semibold"> Master IELTS, ace interviews, and excel in business English</span> with 
             personalized feedback designed for Indian professionals.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link
               to="/ielts"
-              className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 inline-flex items-center justify-center shadow-2xl hover:shadow-3xl transform hover:scale-105"
+              className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 inline-flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
               Start Your Journey
-              <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               to="/glimpse"
-              className="group bg-white border-2 border-neutral-300 hover:border-blue-400 hover:bg-blue-50 text-neutral-900 px-10 py-5 rounded-2xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="group bg-white border-2 border-neutral-300 hover:border-blue-400 hover:bg-blue-50 text-neutral-900 px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Explore AI Features
             </Link>
@@ -98,57 +98,62 @@ const Home: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-neutral-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-neutral-900 mb-4">
-              Everything you need to succeed
+      <section className="py-24 bg-gradient-to-br from-neutral-50 to-blue-50/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <span>🚀</span>
+              <span>AI-Powered Features</span>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-6">
+              Everything You Need to 
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Succeed</span>
             </h2>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
-              Practice with AI-powered feedback designed for Indian English speakers and career goals.
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto leading-relaxed">
+              Practice with cutting-edge AI feedback designed specifically for Indian English speakers and career goals.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* IELTS Practice */}
-            <Link to="/ielts" className="bg-white rounded-lg p-8 hover:shadow-md transition-shadow group">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-                <Target className="w-6 h-6 text-blue-600" />
+            <Link to="/ielts" className="group bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-neutral-200/50 hover:border-blue-200 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Target className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-3">IELTS Preparation</h3>
-              <p className="text-neutral-600 mb-4">
-                Practice all four skills with AI feedback. Designed for Indian test-takers with local context and examples.
+              <h3 className="text-2xl font-bold text-neutral-900 mb-4">IELTS Mastery</h3>
+              <p className="text-neutral-600 mb-6 leading-relaxed">
+                Master all four IELTS skills with AI-powered feedback. Tailored for Indian test-takers with local context, examples, and success strategies.
               </p>
-              <div className="text-blue-600 font-medium text-sm flex items-center">
-                Start practicing <ArrowRight className="w-4 h-4 ml-1" />
+              <div className="text-blue-600 font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                Start Your Prep <ArrowRight className="w-5 h-5 ml-2" />
               </div>
             </Link>
 
             {/* Interview Practice */}
-            <Link to="/interview" className="bg-white rounded-lg p-8 hover:shadow-md transition-shadow group">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
-                <Users className="w-6 h-6 text-green-600" />
+            <Link to="/interview" className="group bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-neutral-200/50 hover:border-green-200 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-3">Job Interview Prep</h3>
-              <p className="text-neutral-600 mb-4">
-                Practice with questions from top Indian companies. Get feedback on your confidence and communication style.
+              <h3 className="text-2xl font-bold text-neutral-900 mb-4">Interview Excellence</h3>
+              <p className="text-neutral-600 mb-6 leading-relaxed">
+                Practice with real questions from top Indian companies. Get AI feedback on confidence, communication style, and professional presence.
               </p>
-              <div className="text-green-600 font-medium text-sm flex items-center">
-                Start practicing <ArrowRight className="w-4 h-4 ml-1" />
+              <div className="text-green-600 font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                Practice Now <ArrowRight className="w-5 h-5 ml-2" />
               </div>
             </Link>
 
             {/* Business English */}
-            <Link to="/business" className="bg-white rounded-lg p-8 hover:shadow-md transition-shadow group">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-                <Briefcase className="w-6 h-6 text-purple-600" />
+            <Link to="/business" className="group bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 border border-neutral-200/50 hover:border-purple-200 transform hover:-translate-y-2">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Briefcase className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-3">Business English</h3>
-              <p className="text-neutral-600 mb-4">
-                Master professional communication for Indian corporate culture and international business.
+              <h3 className="text-2xl font-bold text-neutral-900 mb-4">Business Fluency</h3>
+              <p className="text-neutral-600 mb-6 leading-relaxed">
+                Master professional communication for Indian corporate culture and international business environments.
               </p>
-              <div className="text-purple-600 font-medium text-sm flex items-center">
-                Coming soon <ArrowRight className="w-4 h-4 ml-1" />
+              <div className="text-purple-600 font-semibold flex items-center group-hover:translate-x-2 transition-transform">
+                Coming Soon <ArrowRight className="w-5 h-5 ml-2" />
               </div>
             </Link>
           </div>
@@ -156,55 +161,86 @@ const Home: React.FC = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-neutral-900 mb-12">
-            Trusted across India
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <div className="text-3xl font-bold text-blue-600 mb-2">50K+</div>
-              <div className="text-sm text-neutral-600">Active Users</div>
+      <section className="py-24 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-neutral-900 mb-4">
+              Trusted Across India
+            </h2>
+            <p className="text-lg text-neutral-600">Join thousands of professionals who've transformed their communication skills</p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
+              <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
+              <div className="text-sm font-medium text-neutral-700">Active Users</div>
+              <div className="text-xs text-neutral-500 mt-1">Growing Daily</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">95%</div>
-              <div className="text-sm text-neutral-600">Success Rate</div>
+            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200">
+              <div className="text-4xl font-bold text-green-600 mb-2">95%</div>
+              <div className="text-sm font-medium text-neutral-700">Success Rate</div>
+              <div className="text-xs text-neutral-500 mt-1">Proven Results</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-purple-600 mb-2">500K+</div>
-              <div className="text-sm text-neutral-600">Practice Sessions</div>
+            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
+              <div className="text-4xl font-bold text-purple-600 mb-2">500K+</div>
+              <div className="text-sm font-medium text-neutral-700">Practice Sessions</div>
+              <div className="text-xs text-neutral-500 mt-1">Completed</div>
             </div>
-            <div>
-              <div className="text-3xl font-bold text-orange-600 mb-2">24/7</div>
-              <div className="text-sm text-neutral-600">AI Support</div>
+            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
+              <div className="text-4xl font-bold text-orange-600 mb-2">24/7</div>
+              <div className="text-sm font-medium text-neutral-700">AI Support</div>
+              <div className="text-xs text-neutral-500 mt-1">Always Available</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to improve your communication?
+      <section className="py-24 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-20 right-20 w-48 h-48 bg-white/10 rounded-full blur-xl"></div>
+        </div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-8">
+            <span>🚀</span>
+            <span>Start Your Journey Today</span>
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold mb-6 leading-tight">
+            Ready to Transform Your
+            <span className="block text-yellow-300">Communication Skills?</span>
           </h2>
-          <p className="text-blue-100 mb-8 text-lg">
-            Join thousands of Indians who have already improved their English skills.
+          <p className="text-xl text-blue-100 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Join thousands of Indian professionals who have already elevated their English skills and career prospects with Rretoriq's AI-powered coaching.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               to="/ielts"
-              className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
+              className="group bg-white text-blue-600 hover:bg-blue-50 px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 inline-flex items-center justify-center shadow-2xl hover:shadow-3xl transform hover:scale-105"
             >
               Start Free Practice
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              to="/about"
-              className="border border-blue-400 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+              to="/signup"
+              className="group border-2 border-white/30 hover:border-white hover:bg-white/10 backdrop-blur-sm text-white px-10 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105"
             >
-              Learn More
+              Create Account
             </Link>
+          </div>
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-8 text-blue-100">
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 text-green-300 mr-2" />
+              <span>No Credit Card Required</span>
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 text-green-300 mr-2" />
+              <span>Free Forever Plan</span>
+            </div>
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 text-green-300 mr-2" />
+              <span>Instant Access</span>
+            </div>
           </div>
         </div>
       </section>
