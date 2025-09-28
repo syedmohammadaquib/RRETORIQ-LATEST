@@ -6,93 +6,66 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-1000"></div>
-        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse delay-500"></div>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden min-h-screen flex items-center">
+        {/* Clean Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50"></div>
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full filter blur-3xl"></div>
         
-        <div className="relative max-w-6xl mx-auto text-center">
-          {/* Brand Badge */}
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 px-6 py-3 rounded-full border border-blue-200 mb-8 shadow-sm">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-semibold tracking-wide">AI-POWERED • MADE FOR INDIA</span>
+        <div className="relative max-w-5xl mx-auto text-center">
+          {/* Simplified Brand Badge */}
+          <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-600 px-5 py-2 rounded-full text-sm font-medium mb-8 border border-blue-100">
+            <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+            <span>AI-POWERED FOR INDIA</span>
           </div>
 
-          {/* Main Brand Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">Rretoriq</span>
-            <span className="block text-neutral-900 mt-3 text-2xl sm:text-3xl lg:text-4xl font-semibold">Transform Your Communication Excellence</span>
+          {/* Clean Main Headline */}
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent block mb-4">Rretoriq</span>
+            <span className="text-2xl sm:text-3xl lg:text-4xl text-neutral-800 font-medium">Transform Your Communication</span>
           </h1>
 
-          {/* Brand Slogan */}
-          <div className="mb-10">
-            <p className="text-lg sm:text-xl text-blue-700 font-semibold italic tracking-wide">
-              "Where Words Meet Wisdom, Skills Meet Success"
-            </p>
-          </div>
-
-          {/* Value Proposition */}
-          <p className="text-lg sm:text-xl text-neutral-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Unlock your potential with India's most advanced AI communication coach. 
-            <span className="text-blue-600 font-semibold"> Master IELTS, ace interviews, and excel in business English</span> with 
-            personalized feedback designed for Indian professionals.
+          {/* Refined Slogan */}
+          <p className="text-xl text-blue-600 font-medium mb-10 italic">
+            "Where Words Meet Wisdom, Skills Meet Success"
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          {/* Simplified Value Proposition */}
+          <p className="text-lg text-neutral-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Master IELTS, ace interviews, and excel in business English with 
+            <span className="text-blue-600 font-semibold"> AI-powered feedback</span> designed for Indian professionals.
+          </p>
+
+          {/* Clean CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
             <Link
               to="/ielts"
-              className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 inline-flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
             >
               Start Your Journey
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               to="/glimpse"
-              className="group bg-white border-2 border-neutral-300 hover:border-blue-400 hover:bg-blue-50 text-neutral-900 px-8 py-4 rounded-xl font-semibold text-base transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="group bg-white/80 backdrop-blur-sm border border-neutral-200 hover:border-blue-300 hover:bg-white text-neutral-700 px-10 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Explore AI Features
+              Explore Features
             </Link>
           </div>
           
-          {/* Enhanced Trust Indicators */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-neutral-200/50 shadow-lg">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle className="w-7 h-7 text-white" />
-              </div>
-              <h3 className="font-bold text-neutral-900 mb-2">Free to Start</h3>
-              <p className="text-sm text-neutral-600 text-center">Begin your journey with our comprehensive free tier</p>
+          {/* Minimal Trust Indicators */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-neutral-600">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="font-medium">Free to Start</span>
             </div>
-            
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-neutral-200/50 shadow-lg">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mb-4">
-                <span className="text-white font-bold text-lg">🇮🇳</span>
-              </div>
-              <h3 className="font-bold text-neutral-900 mb-2">Made for India</h3>
-              <p className="text-sm text-neutral-600 text-center">Hindi & English support with Indian context</p>
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">🇮🇳</span>
+              <span className="font-medium">Made for India</span>
             </div>
-            
-            <div className="flex flex-col items-center p-6 bg-white/70 backdrop-blur-sm rounded-2xl border border-neutral-200/50 shadow-lg">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mb-4">
-                <span className="text-white font-bold text-sm">50K+</span>
-              </div>
-              <h3 className="font-bold text-neutral-900 mb-2">Trusted Users</h3>
-              <p className="text-sm text-neutral-600 text-center">Join thousands of successful professionals</p>
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-blue-600">50K+</span>
+              <span className="font-medium">Trusted Users</span>
             </div>
-          </div>
-
-          {/* Brand Promise */}
-          <div className="mt-16 p-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl text-white shadow-2xl">
-            <p className="text-xl sm:text-2xl font-bold mb-4">
-              🚀 Your Success Story Starts Here
-            </p>
-            <p className="text-lg opacity-90 max-w-3xl mx-auto">
-              Join the revolution of AI-powered communication training. Whether you're preparing for IELTS, 
-              mastering job interviews, or elevating your business English - Rretoriq is your partner in excellence.
-            </p>
           </div>
         </div>
       </section>
