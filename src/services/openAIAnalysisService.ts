@@ -8,6 +8,8 @@
 // Proxy configuration - call server-side proxy which holds API keys
 const API_PROXY_BASE = import.meta.env.VITE_API_PROXY_BASE || (typeof window !== 'undefined' && window.location && window.location.hostname.includes('rretoriq25.web.app') ? 'https://rretoriq-backend-api.vercel.app/api' : '/api')
 const OPENAI_PROXY_URL = `${API_PROXY_BASE}/openai-proxy`
+const GEMINI_PROXY_URL = `${API_PROXY_BASE}/gemini-proxy`
+const ANALYSIS_PROVIDER = import.meta.env.VITE_AI_ANALYSIS_PROVIDER || 'gemini'
 
 export interface InterviewQuestion {
   id: string
@@ -148,21 +150,31 @@ Focus on providing constructive, actionable feedback that helps the candidate im
         duration: request.audioDuration
       })
 
-      // Send request to server-side proxy which will attach the API key
-      const response = await fetch(OPENAI_PROXY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gpt-4-turbo-preview',
-          messages: [
-            { role: 'system', content: 'You are an expert interview coach and HR professional with extensive experience in candidate evaluation. Provide detailed, constructive feedback.' },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.3,
-          max_tokens: 2000,
-          response_format: { type: 'json_object' }
+      let response
+      if (ANALYSIS_PROVIDER === 'gemini') {
+        // Gemini expects { input: 'text' }
+        response = await fetch(GEMINI_PROXY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: prompt, model: import.meta.env.VITE_GEMINI_MODEL || 'models/text-bison-001' })
         })
-      })
+      } else {
+        // Fallback to OpenAI proxy
+        response = await fetch(OPENAI_PROXY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'gpt-4-turbo-preview',
+            messages: [
+              { role: 'system', content: 'You are an expert interview coach and HR professional with extensive experience in candidate evaluation. Provide detailed, constructive feedback.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.3,
+            max_tokens: 2000,
+            response_format: { type: 'json_object' }
+          })
+        })
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
@@ -172,18 +184,37 @@ Focus on providing constructive, actionable feedback that helps the candidate im
       const data = await response.json()
       const processingTime = Date.now() - startTime
 
-      if (!data.choices || data.choices.length === 0) {
-        throw new Error('No analysis results received from OpenAI')
-      }
+      let analysisContent = null
+      let analysisResult = null
 
-      const analysisContent = data.choices[0].message.content
-      let analysisResult
+      if (ANALYSIS_PROVIDER === 'gemini') {
+        // Expected shape forwarded from gemini-proxy: { candidates: [{ content: '...' }, ...] }
+        const candidate = data?.candidates && data.candidates[0]
+        analysisContent = candidate?.content || JSON.stringify(data)
+        try {
+          analysisResult = JSON.parse(analysisContent)
+        } catch (err) {
+          // If Gemini returned plain text, wrap it in a minimal structure
+          analysisResult = {
+            overallScore: 0,
+            feedback: { strengths: [], weaknesses: [], suggestions: [], detailedFeedback: analysisContent },
+            scores: { clarity: 0, relevance: 0, structure: 0, completeness: 0, confidence: 0 },
+            keyPoints: { covered: [], missed: [] },
+            timeManagement: { duration: request.audioDuration, efficiency: 'average', pacing: '' }
+          }
+        }
+      } else {
+        if (!data.choices || data.choices.length === 0) {
+          throw new Error('No analysis results received from OpenAI')
+        }
 
-      try {
-        analysisResult = JSON.parse(analysisContent)
-      } catch (parseError) {
-        console.error('Failed to parse OpenAI response:', analysisContent)
-        throw new Error('Invalid response format from OpenAI')
+        analysisContent = data.choices[0].message.content
+        try {
+          analysisResult = JSON.parse(analysisContent)
+        } catch (parseError) {
+          console.error('Failed to parse OpenAI response:', analysisContent)
+          throw new Error('Invalid response format from OpenAI')
+        }
       }
 
       console.log('✅ OpenAI analysis completed', {
