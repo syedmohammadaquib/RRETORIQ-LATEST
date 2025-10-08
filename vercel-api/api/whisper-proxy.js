@@ -28,15 +28,22 @@ module.exports = (req, res) => {
 
   try {
     const busboy = new Busboy({ headers: req.headers })
-    let fileStream = null
+    let fileBuffer = null
     let filename = 'recording.webm'
     const fields = {}
 
     busboy.on('file', (fieldname, file, info) => {
       const { filename: name } = info || {}
       if (name) filename = name
-      fileStream = file
-      // Do not consume the stream here; we will attach it to form-data when 'finish' fires
+      const chunks = []
+      file.on('data', (data) => chunks.push(data))
+      file.on('end', () => {
+        try {
+          fileBuffer = Buffer.concat(chunks)
+        } catch (e) {
+          console.error('Error concatenating file chunks:', e)
+        }
+      })
     })
 
     busboy.on('field', (name, val) => {
@@ -44,11 +51,11 @@ module.exports = (req, res) => {
     })
 
     busboy.on('finish', async () => {
-      if (!fileStream) return res.status(400).json({ error: 'Missing file field' })
+      if (!fileBuffer) return res.status(400).json({ error: 'Missing file field or empty upload' })
 
       try {
         const form = new FormData()
-        form.append('file', fileStream, { filename })
+        form.append('file', fileBuffer, { filename })
         form.append('model', 'whisper-1')
         if (fields.language) form.append('language', fields.language)
         if (fields.temperature) form.append('temperature', fields.temperature)
