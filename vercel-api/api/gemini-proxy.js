@@ -49,7 +49,9 @@ module.exports = async (req, res) => {
         let url = candidateUrl
         if (isBearer) headers.Authorization = `Bearer ${GEMINI_KEY}`
         else url = `${candidateUrl}?key=${encodeURIComponent(GEMINI_KEY)}`
-        tried.push(url)
+  // Mask any API key in the URL before recording it in diagnostics
+  const maskedUrl = url.replace(/([?&]key=)[^&]+/i, '$1[REDACTED]')
+  tried.push(maskedUrl)
         const response = await axios.post(url, body, { headers, timeout: 60000 })
         // If successful, return immediately
         return res.status(response.status).json(response.data)
