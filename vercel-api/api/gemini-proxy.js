@@ -25,12 +25,23 @@ module.exports = async (req, res) => {
     // Build the endpoint and request according to Google Generative API patterns.
     // Prefer Authorization: Bearer if GEMINI_KEY appears to be a bearer token, otherwise fall back to ?key= API key.
     // Candidate endpoint patterns to try (some projects/APIs use different host or version)
-    const candidates = [
-      `https://generativelanguage.googleapis.com/v1beta2/models/${model}:generate`,
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generate`,
-      `https://generativeai.googleapis.com/v1beta2/models/${model}:generate`,
-      `https://generativeai.googleapis.com/v1beta/models/${model}:generate`
-    ]
+    const candidates = []
+
+    // If a project id and location are provided, prefer project-scoped endpoints
+    const projectId = process.env.GEMINI_PROJECT_ID || process.env.GENERATIVE_PROJECT_ID || process.env.GCLOUD_PROJECT
+    const projectLocation = process.env.GEMINI_PROJECT_LOCATION || process.env.GENERATIVE_PROJECT_LOCATION || 'global'
+    if (projectId) {
+      candidates.push(`https://generativelanguage.googleapis.com/v1beta/projects/${projectId}/locations/${projectLocation}/models/${model}:generate`)
+      candidates.push(`https://generativeai.googleapis.com/v1beta/projects/${projectId}/locations/${projectLocation}/models/${model}:generate`)
+      candidates.push(`https://generativelanguage.googleapis.com/v1beta2/projects/${projectId}/locations/${projectLocation}/models/${model}:generate`)
+      candidates.push(`https://generativeai.googleapis.com/v1beta2/projects/${projectId}/locations/${projectLocation}/models/${model}:generate`)
+    }
+
+    // Fallback to global model endpoints
+    candidates.push(`https://generativelanguage.googleapis.com/v1beta2/models/${model}:generate`)
+    candidates.push(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generate`)
+    candidates.push(`https://generativeai.googleapis.com/v1beta2/models/${model}:generate`)
+    candidates.push(`https://generativeai.googleapis.com/v1beta/models/${model}:generate`)
 
     const isBearer = typeof GEMINI_KEY === 'string' && GEMINI_KEY.trim().startsWith('ya29.')
     const headersBase = { 'Content-Type': 'application/json' }
