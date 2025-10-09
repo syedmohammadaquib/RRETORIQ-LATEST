@@ -52,13 +52,17 @@ module.exports = async (req, res) => {
       { input },
       { prompt: { text: input } },
       { prompt: input },
-      { text: input }
+      { text: input },
+      { instances: [{ input }] },
+      { messages: [{ role: 'user', content: [{ type: 'text', text: input }] }] }
     ]
 
     let lastError = null
     const tried = []
-    // Include an attempt without any suffix (some endpoints accept model URL directly)
-    const suffixes = ['', ':generateContent', ':generate']
+  // Include multiple possible method suffixes used by different Generative API variants.
+  // Some endpoints accept the model URL directly (no suffix), others use :generateContent, :generate,
+  // :generateText, :predict or :responses depending on API surface/version.
+  const suffixes = ['', ':generateContent', ':generate', ':generateText', ':predict', ':responses']
     for (const candidateUrl of candidates) {
       for (const suffix of suffixes) {
         const urlBase = `${candidateUrl}${suffix}`
