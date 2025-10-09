@@ -1,145 +1,65 @@
-const axios = require('axios')
-
-function setCors(req, res) {
-  const allowed = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean)
-  const origin = req.headers.origin
-  if (!origin) {
-    res.setHeader('Access-Control-Allow-Origin', '*')
-  } else if (allowed.length === 0 || allowed.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin)
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Only POST requests allowed" });
   }
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-}
 
-module.exports = async (req, res) => {
-  setCors(req, res)
-  if (req.method === 'OPTIONS') return res.status(204).end()
   try {
-    const GEMINI_KEY = process.env.GEMINI_KEY
-    if (!GEMINI_KEY) return res.status(500).json({ error: 'Gemini key not configured on server.' })
+    const { question, answer, metadata } = req.body;
 
-  const { model = 'gemini-2.0-flash', input } = req.body || {}
-    if (!input) return res.status(400).json({ error: 'Missing input in request body' })
-
-    // Build the endpoint and request according to Google Generative API patterns.
-    // Prefer Authorization: Bearer if GEMINI_KEY appears to be a bearer token, otherwise fall back to ?key= API key.
-    // Candidate endpoint patterns to try (some projects/APIs use different host or version)
-    const candidates = []
-
-    // If a project id and location are provided, prefer project-scoped endpoints
-    const projectId = process.env.GEMINI_PROJECT_ID || process.env.GENERATIVE_PROJECT_ID || process.env.GCLOUD_PROJECT
-    const projectLocation = process.env.GEMINI_PROJECT_LOCATION || process.env.GENERATIVE_PROJECT_LOCATION || 'global'
-    if (projectId) {
-      candidates.push(`https://generativelanguage.googleapis.com/v1beta/projects/${projectId}/locations/${projectLocation}/models/${model}`)
-      candidates.push(`https://generativeai.googleapis.com/v1beta/projects/${projectId}/locations/${projectLocation}/models/${model}`)
-      candidates.push(`https://generativelanguage.googleapis.com/v1beta2/projects/${projectId}/locations/${projectLocation}/models/${model}`)
-      candidates.push(`https://generativeai.googleapis.com/v1beta2/projects/${projectId}/locations/${projectLocation}/models/${model}`)
+    if (!process.env.GEMINI_API_KEY) {
+      console.error("❌ Gemini API key not found");
+      return res.status(500).json({ error: "Gemini API key not configured." });
     }
 
-    // Fallback to global model endpoints (base path; we'll append method suffixes)
-    candidates.push(`https://generativelanguage.googleapis.com/v1beta2/models/${model}`)
-    candidates.push(`https://generativelanguage.googleapis.com/v1beta/models/${model}`)
-    candidates.push(`https://generativeai.googleapis.com/v1beta2/models/${model}`)
-    candidates.push(`https://generativeai.googleapis.com/v1beta/models/${model}`)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
-    const isBearer = typeof GEMINI_KEY === 'string' && GEMINI_KEY.trim().startsWith('ya29.')
-    const headersBase = { 'Content-Type': 'application/json', Accept: 'application/json' }
+    const payload = {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `You are an AI interview evaluator.
+Analyze this candidate's spoken answer and give a short structured communication-skill analysis.
 
-    // Default candidate body shapes and suffixes. We'll try to reorder these based on model metadata
-    // if the metadata endpoint is reachable (this helps select the correct RPC method & payload shape).
-    let bodyVariants = [
-      { input },
-      { prompt: { text: input } },
-      { prompt: input },
-      { text: input },
-      { instances: [{ input }] },
-      { messages: [{ role: 'user', content: [{ type: 'text', text: input }] }] }
-    ]
+Question: ${question}
+Answer: ${answer}
+Metadata: ${JSON.stringify(metadata)}
 
-    // Default suffix candidates; we'll prefer methods reported by the model metadata when available.
-    let suffixes = ['', ':generateContent', ':generate', ':generateText', ':predict', ':responses']
+Return JSON with keys:
+{
+  "clarity": "score out of 10",
+  "confidence": "score out of 10",
+  "fluency": "score out of 10",
+  "summary": "short human-readable feedback"
+}`,
+            },
+          ],
+        },
+      ],
+    };
 
-    // Try to fetch model metadata to learn supportedGenerationMethods and prefer matching suffix/body shapes.
-    try {
-      const metaUrlBase = `https://generativelanguage.googleapis.com/v1beta/models/${model}`
-      let metaUrl = metaUrlBase
-      const metaHeaders = {}
-      if (!isBearer) metaUrl = `${metaUrl}?key=${encodeURIComponent(GEMINI_KEY)}`
-      else metaHeaders.Authorization = `Bearer ${GEMINI_KEY}`
+    const geminiResponse = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      const metaRes = await axios.get(metaUrl, { headers: metaHeaders, timeout: 5000 })
-      const methods = metaRes?.data?.supportedGenerationMethods || metaRes?.data?.supportedMethods || []
-      if (Array.isArray(methods) && methods.length > 0) {
-        // Map method names to suffixes and prefer them first
-        const mapped = methods.map(m => `:${m}`)
-        // Prepend unique mapped methods (preserve order)
-        suffixes = [...mapped.filter(s => !suffixes.includes(s)), ...suffixes]
+    const raw = await geminiResponse.text();
+    console.log("🔍 Gemini Raw Response:", raw);
 
-        // Reorder bodyVariants heuristically based on common method names
-        if (methods.includes('generateText') || methods.includes('generate')) {
-          bodyVariants = [ { prompt: { text: input } }, { prompt: input }, { input }, ...bodyVariants.filter(b => Object.keys(b)[0] !== 'prompt') ]
-        }
-        if (methods.includes('responses')) {
-          bodyVariants = [ { messages: [{ role: 'user', content: [{ type: 'text', text: input }] }] }, ...bodyVariants.filter(b => Object.keys(b)[0] !== 'messages') ]
-        }
-      }
-    } catch (metaErr) {
-      // metadata fetch failed — that's OK, we'll fall back to the default candidates
-      console.warn('Could not fetch model metadata, falling back to default method ordering', metaErr?.message || metaErr)
+    if (!geminiResponse.ok) {
+      return res.status(500).json({ error: `Gemini API error: ${raw}` });
     }
 
-    let lastError = null
-    const tried = []
-    for (const candidateUrl of candidates) {
-      for (const suffix of suffixes) {
-        const urlBase = `${candidateUrl}${suffix}`
-        // Try all body variants for this url/suffix until one succeeds
-        for (const body of bodyVariants) {
-          try {
-            const headers = { ...headersBase }
-            let url = urlBase
-            if (isBearer) headers.Authorization = `Bearer ${GEMINI_KEY}`
-            else url = `${url}?key=${encodeURIComponent(GEMINI_KEY)}`
+    const data = JSON.parse(raw);
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-            // Mask any API key in the URL before recording it in diagnostics
-            const maskedUrl = url.replace(/([?&]key=)[^&]+/i, '$1[REDACTED]')
-            tried.push({ url: maskedUrl, bodyShape: Object.keys(body) })
-
-            const response = await axios.post(url, body, { headers, timeout: 60000 })
-            // If successful, return immediately
-            return res.status(response.status).json(response.data)
-          } catch (e) {
-            const status = e?.response?.status
-            lastError = e
-            // If the path wasn't found, try next candidate
-            if (status === 404) {
-              break // break bodyVariants loop and try next suffix/candidate
-            }
-            // If payload schema mismatch (400), try next body variant rather than failing immediately
-            if (status === 400) {
-              // continue to next body variant
-              continue
-            }
-            // For auth errors or other server errors, return immediately
-            console.error('Gemini proxy error (non-404/400):', e?.response?.data || e.message || e)
-            const statusCode = status || 500
-            const data = e?.response?.data || { error: e.message }
-            return res.status(statusCode).json({ error: data, tried })
-          }
-        }
-      }
-    }
-
-    // If we exhausted candidates, return the last error with diagnostic info
-    console.error('Gemini proxy error: all endpoint candidates failed', lastError?.message || lastError)
-  const status = lastError?.response?.status || 502
-  const data = lastError?.response?.data || { error: lastError?.message || 'Failed to reach Gemini API' }
-  return res.status(status).json({ error: data, tried })
-  } catch (err) {
-    console.error('Gemini proxy error:', err?.response?.data || err.message || err)
-    const status = err?.response?.status || 500
-    const data = err?.response?.data || { error: err.message }
-    return res.status(status).json(data)
+    return res.status(200).json({ result: text });
+  } catch (error) {
+    console.error("❌ Gemini Proxy Crash:", error);
+    return res
+      .status(500)
+      .json({ error: error.message || "Gemini Proxy internal error" });
   }
 }

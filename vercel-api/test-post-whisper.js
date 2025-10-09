@@ -4,7 +4,7 @@ const FormData = require('form-data');
 
 async function run() {
   const form = new FormData();
-  form.append('file', fs.createReadStream('./test-audio.wav'));
+  form.append('file', fs.createReadStream('./e2e-test.wav'));
   form.append('model', 'whisper-1');
 
   try {
