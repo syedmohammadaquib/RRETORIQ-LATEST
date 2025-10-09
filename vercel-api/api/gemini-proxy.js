@@ -46,9 +46,9 @@ module.exports = async (req, res) => {
     const isBearer = typeof GEMINI_KEY === 'string' && GEMINI_KEY.trim().startsWith('ya29.')
     const headersBase = { 'Content-Type': 'application/json', Accept: 'application/json' }
 
-    // Prepare multiple candidate body shapes to support different Google Generative API variants.
-    // The frontend sends { input } so try that first, then fall back to common alternatives.
-    const bodyVariants = [
+    // Default candidate body shapes and suffixes. We'll try to reorder these based on model metadata
+    // if the metadata endpoint is reachable (this helps select the correct RPC method & payload shape).
+    let bodyVariants = [
       { input },
       { prompt: { text: input } },
       { prompt: input },
@@ -57,12 +57,40 @@ module.exports = async (req, res) => {
       { messages: [{ role: 'user', content: [{ type: 'text', text: input }] }] }
     ]
 
+    // Default suffix candidates; we'll prefer methods reported by the model metadata when available.
+    let suffixes = ['', ':generateContent', ':generate', ':generateText', ':predict', ':responses']
+
+    // Try to fetch model metadata to learn supportedGenerationMethods and prefer matching suffix/body shapes.
+    try {
+      const metaUrlBase = `https://generativelanguage.googleapis.com/v1beta/models/${model}`
+      let metaUrl = metaUrlBase
+      const metaHeaders = {}
+      if (!isBearer) metaUrl = `${metaUrl}?key=${encodeURIComponent(GEMINI_KEY)}`
+      else metaHeaders.Authorization = `Bearer ${GEMINI_KEY}`
+
+      const metaRes = await axios.get(metaUrl, { headers: metaHeaders, timeout: 5000 })
+      const methods = metaRes?.data?.supportedGenerationMethods || metaRes?.data?.supportedMethods || []
+      if (Array.isArray(methods) && methods.length > 0) {
+        // Map method names to suffixes and prefer them first
+        const mapped = methods.map(m => `:${m}`)
+        // Prepend unique mapped methods (preserve order)
+        suffixes = [...mapped.filter(s => !suffixes.includes(s)), ...suffixes]
+
+        // Reorder bodyVariants heuristically based on common method names
+        if (methods.includes('generateText') || methods.includes('generate')) {
+          bodyVariants = [ { prompt: { text: input } }, { prompt: input }, { input }, ...bodyVariants.filter(b => Object.keys(b)[0] !== 'prompt') ]
+        }
+        if (methods.includes('responses')) {
+          bodyVariants = [ { messages: [{ role: 'user', content: [{ type: 'text', text: input }] }] }, ...bodyVariants.filter(b => Object.keys(b)[0] !== 'messages') ]
+        }
+      }
+    } catch (metaErr) {
+      // metadata fetch failed — that's OK, we'll fall back to the default candidates
+      console.warn('Could not fetch model metadata, falling back to default method ordering', metaErr?.message || metaErr)
+    }
+
     let lastError = null
     const tried = []
-  // Include multiple possible method suffixes used by different Generative API variants.
-  // Some endpoints accept the model URL directly (no suffix), others use :generateContent, :generate,
-  // :generateText, :predict or :responses depending on API surface/version.
-  const suffixes = ['', ':generateContent', ':generate', ':generateText', ':predict', ':responses']
     for (const candidateUrl of candidates) {
       for (const suffix of suffixes) {
         const urlBase = `${candidateUrl}${suffix}`
