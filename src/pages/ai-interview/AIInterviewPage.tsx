@@ -40,9 +40,8 @@ export default function AIInterviewPage() {
     enableRealTimeTranscription: true
   });
 
-  // Environment check
-  const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const hasOpenAiKey = openAiKey && openAiKey.trim() !== '' && !openAiKey.includes('your_');
+  // No API key check needed - all AI services now run through server-side proxies
+  // (Gemini for analysis, Whisper for transcription)
 
   useEffect(() => {
     if (!user) {
@@ -151,13 +150,7 @@ export default function AIInterviewPage() {
   };
 
   const startSession = () => {
-    if (!hasOpenAiKey && sessionConfig.includeAIEvaluation) {
-      if (!confirm('OpenAI API key is not configured. The interview will work but AI evaluation will be disabled. Continue?')) {
-        return;
-      }
-      setSessionConfig(prev => ({ ...prev, includeAIEvaluation: false }));
-    }
-    
+    // All AI services now run through server-side proxies, no client-side key check needed
     setSessionActive(true);
   };
 
@@ -486,10 +479,9 @@ export default function AIInterviewPage() {
                       type="checkbox"
                       checked={sessionConfig.includeAIEvaluation}
                       onChange={(e) => setSessionConfig(prev => ({ ...prev, includeAIEvaluation: e.target.checked }))}
-                      disabled={!hasOpenAiKey}
                       className="rounded border-gray-300 text-black focus:ring-black"
                     />
-                    <span className="text-sm text-gray-700">Enable AI Evaluation</span>
+                    <span className="text-sm text-gray-700">Enable AI Evaluation (Gemini)</span>
                   </label>
                   
                   <label className="flex items-center space-x-2">
@@ -549,7 +541,7 @@ export default function AIInterviewPage() {
                   <div className="space-y-1 text-sm text-gray-700">
                     <div>✅ Voice Recording</div>
                     <div>✅ Speech-to-Text</div>
-                    <div>{sessionConfig.includeAIEvaluation && hasOpenAiKey ? '✅' : '❌'} AI Evaluation</div>
+                    <div>{sessionConfig.includeAIEvaluation ? '✅' : '❌'} AI Evaluation</div>
                     <div>✅ Progress Tracking</div>
                   </div>
                 </div>
