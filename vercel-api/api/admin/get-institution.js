@@ -18,6 +18,7 @@ if (!getApps().length) {
 const db = getFirestore();
 
 module.exports = async (req, res) => {
+  // Set CORS headers first, before any logic
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -32,6 +33,8 @@ module.exports = async (req, res) => {
 
   try {
     const { adminUserId, institutionId } = req.query;
+    
+    console.log('🔍 get-institution called with:', { adminUserId, institutionId });
 
     if (!adminUserId && !institutionId) {
       return res.status(400).json({ 
@@ -133,8 +136,14 @@ module.exports = async (req, res) => {
 
   } catch (error) {
     console.error('❌ Error fetching institution:', error);
+    console.error('Stack:', error.stack);
+    
+    // Make sure CORS headers are set even on error
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    
     return res.status(500).json({ 
-      error: error.message || 'Failed to fetch institution data' 
+      error: error.message || 'Failed to fetch institution data',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
