@@ -15,11 +15,18 @@ if (req.method === "OPTIONS") {
 
   try {
   // Frontend sends: { model: 'gemini-2.0-flash', input: '<prompt>' }
-  const { model = 'gemini-pro', input } = req.body;
-  console.log("🧠 Incoming Gemini Request:", { model, inputLength: input?.length });
+  // OR: { prompt: '<prompt>', fileData: { data: 'base64', mimeType: 'application/pdf' } }
+  const { model = 'gemini-pro', input, prompt, fileData } = req.body;
+  const actualInput = input || prompt; // Support both field names
+  
+  console.log("🧠 Incoming Gemini Request:", { 
+    model, 
+    inputLength: actualInput?.length,
+    hasFileData: !!fileData 
+  });
 
-  if (!input) {
-    return res.status(400).json({ error: "Missing 'input' in request body" });
+  if (!actualInput) {
+    return res.status(400).json({ error: "Missing 'input' or 'prompt' in request body" });
   }
 
   if (!process.env.GEMINI_API_KEY) {
@@ -41,20 +48,33 @@ if (req.method === "OPTIONS") {
   const geminiModel = modelMapping[model] || 'gemini-2.0-flash-exp';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
+  // Build parts array - include text and optionally file data
+  const parts = [{ text: actualInput }];
+  
+  // Add file data if provided (for resume parsing)
+  if (fileData && fileData.data && fileData.mimeType) {
+    parts.push({
+      inline_data: {
+        mime_type: fileData.mimeType,
+        data: fileData.data
+      }
+    });
+  }
+
   const payload = {
     contents: [
       {
         role: "user",
-        parts: [
-          {
-            text: input
-          }
-        ]
+        parts: parts
       }
     ]
   };
 
-  console.log("📡 Sending payload to Gemini:", payload);
+  console.log("📡 Sending payload to Gemini:", {
+    model: geminiModel,
+    partsCount: parts.length,
+    hasFileData: parts.length > 1
+  });
 
   const geminiResponse = await fetch(url, {
     method: "POST",
@@ -76,8 +96,15 @@ if (req.method === "OPTIONS") {
     candidatesCount: data.candidates?.length 
   });
   
-  // Return the raw Google Gemini response format (frontend expects this structure)
-  return res.status(200).json(data);
+  // Extract text from response for easier consumption
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  
+  // Return both the raw response and extracted text
+  return res.status(200).json({
+    ...data,
+    text: text,
+    response: text // Alias for compatibility
+  });
 
   } catch (error) {
     console.error("❌ Gemini Proxy Crash:", error);
