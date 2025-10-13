@@ -7,7 +7,7 @@ import {
   Clock,
   BookOpen,
   CheckCircle,
-  XCircle,
+  ArrowRight,
   PenTool,
   MessageSquare
 } from 'lucide-react'
@@ -211,127 +211,192 @@ export default function IELTSPractice() {
 
   if (sessionStarted && currentQuestion) {
     return (
-      <div className="min-h-screen bg-white py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="border border-gray-200 rounded-xl p-8 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-xl font-medium text-gray-900">
-                Let's Communicate - {currentQuestion.difficulty} Level
-              </h1>
-              <button
-                onClick={resetSession}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <XCircle className="w-5 h-5" />
-              </button>
+      <div className="h-screen flex flex-col bg-gradient-to-br from-teal-50 to-cyan-50">
+        {/* Fixed Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={resetSession}
+                  className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                >
+                  ← Exit
+                </button>
+                <div className="h-6 w-px bg-gray-300"></div>
+                <h1 className="text-base font-bold text-gray-900">
+                  Let's Communicate
+                </h1>
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
+                  currentQuestion.difficulty === 'Easy' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {currentQuestion.difficulty}
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-gray-700">
+                Question {currentQuestionIndex + 1}/{selectedQuestions.length}
+              </div>
             </div>
             
-            <div className="flex items-center space-x-8 text-sm text-gray-600">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4" />
-                <span>Time Limit: {formatTime(currentQuestion.timeLimit)}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <BookOpen className="w-4 h-4" />
-                <span>Question {currentQuestionIndex + 1} of {selectedQuestions.length}</span>
-              </div>
-              {isRecording && (
-                <div className="flex items-center space-x-2 text-gray-900">
-                  <div className="w-2 h-2 bg-gray-900 rounded-full animate-pulse" />
-                  <span className="font-medium">Recording: {formatTime(recordingTime)}</span>
-                </div>
-              )}
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div 
+                className="bg-gradient-to-r from-teal-500 to-cyan-600 h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${((currentQuestionIndex + 1) / selectedQuestions.length) * 100}%` }}
+              />
             </div>
           </div>
+        </div>
 
-          {/* Question */}
-          <div className="border border-gray-200 rounded-xl p-8 mb-8">
-            <div className="mb-8">
-              <h2 className="text-sm font-medium text-gray-600 mb-3">Instructions</h2>
-              <p className="text-gray-700 leading-relaxed">{currentQuestion.instructions}</p>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Question</h2>
-              <p className="text-base text-gray-800 mb-4 leading-relaxed">{currentQuestion.question}</p>
-              
-              {currentQuestion.keyPoints && currentQuestion.keyPoints.length > 0 && (
-                <div className="bg-gray-50 border-l-2 border-gray-200 p-4 rounded">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Key Points to Consider:</p>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-                    {currentQuestion.keyPoints.map((point, idx) => (
-                      <li key={idx}>{point}</li>
-                    ))}
-                  </ul>
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto px-6 py-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Left Column - Question */}
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3 text-sm text-gray-600">
+                    <div className="flex items-center space-x-1.5">
+                      <Clock className="w-4 h-4 text-teal-600" />
+                      <span className="font-medium">Time: {formatTime(currentQuestion.timeLimit)}</span>
+                    </div>
+                    {isRecording && (
+                      <>
+                        <div className="w-1 h-1 bg-gray-300 rounded-full"></div>
+                        <div className="flex items-center space-x-1.5 text-red-600">
+                          <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+                          <span className="font-semibold">{formatTime(recordingTime)}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* Recording Controls */}
-            {selectedType === 'speaking' && (
-              <div className="flex flex-col items-center space-y-6">
-                <div className="flex items-center space-x-4">
-                  {!isRecording ? (
-                    <button
-                      onClick={startRecording}
-                      className="bg-black text-white p-4 rounded-full hover:bg-gray-800 transition-colors"
-                    >
-                      <Mic className="w-6 h-6" />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={stopRecording}
-                      className="bg-black text-white p-4 rounded-full hover:bg-gray-800 transition-colors"
-                    >
-                      <Square className="w-6 h-6" />
-                    </button>
-                  )}
+                <div className="mb-5">
+                  <h2 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Instructions</h2>
+                  <p className="text-sm text-gray-700 leading-relaxed">{currentQuestion.instructions}</p>
+                </div>
+
+                <div className="mb-6">
+                  <h2 className="text-base font-bold text-gray-900 mb-3">Question</h2>
+                  <p className="text-base text-gray-800 leading-relaxed">{currentQuestion.question}</p>
                 </div>
                 
-                <p className="text-sm text-gray-600 text-center max-w-md">
-                  {!isRecording 
-                    ? 'Click the microphone to start recording your response'
-                    : 'Click the stop button to finish recording'
-                  }
-                </p>
+                {currentQuestion.keyPoints && currentQuestion.keyPoints.length > 0 && (
+                  <div className="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">💡 Key Points to Consider:</p>
+                    <ul className="space-y-1.5 text-sm text-gray-700">
+                      {currentQuestion.keyPoints.map((point, idx) => (
+                        <li key={idx} className="flex items-start">
+                          <span className="text-teal-600 mr-2">•</span>
+                          <span>{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
-                {responses[currentQuestion.id] && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 w-full">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-5 h-5 text-gray-600" />
-                      <span className="text-gray-800 font-medium">Response recorded successfully</span>
+              {/* Right Column - Recording Interface */}
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 flex flex-col">
+                {selectedType === 'speaking' && (
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    {/* Recording Status */}
+                    <div className="mb-6 text-center">
+                      {!isRecording && !responses[currentQuestion.id] && (
+                        <>
+                          <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <Mic className="w-10 h-10 text-white" />
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">Ready to Record</h3>
+                          <p className="text-sm text-gray-600">Click the button below to start</p>
+                        </>
+                      )}
+                      
+                      {isRecording && (
+                        <>
+                          <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                            <div className="w-6 h-6 bg-white rounded-sm"></div>
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">Recording...</h3>
+                          <p className="text-sm text-gray-600">Speak clearly and confidently</p>
+                        </>
+                      )}
+                      
+                      {responses[currentQuestion.id] && !isRecording && (
+                        <>
+                          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <CheckCircle className="w-10 h-10 text-white" />
+                          </div>
+                          <h3 className="text-lg font-bold text-gray-900 mb-2">Recording Complete!</h3>
+                          <p className="text-sm text-gray-600">Your response has been saved</p>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Recording Controls */}
+                    <div className="flex items-center space-x-4 mb-6">
+                      {!isRecording ? (
+                        <button
+                          onClick={startRecording}
+                          disabled={!!responses[currentQuestion.id]}
+                          className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-8 py-4 rounded-full hover:from-teal-700 hover:to-cyan-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 font-semibold"
+                        >
+                          <Mic className="w-5 h-5" />
+                          <span>Start Recording</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={stopRecording}
+                          className="bg-red-600 text-white px-8 py-4 rounded-full hover:bg-red-700 transition-all shadow-lg flex items-center space-x-2 font-semibold"
+                        >
+                          <Square className="w-5 h-5" />
+                          <span>Stop Recording</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Tips */}
+                    <div className="bg-gray-50 rounded-lg p-4 w-full max-w-sm">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">📝 Speaking Tips:</p>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p>✓ Speak at a comfortable pace</p>
+                        <p>✓ Structure your answer clearly</p>
+                        <p>✓ Use specific examples</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Writing Interface */}
+                {selectedType === 'writing' && (
+                  <div className="flex-1 flex flex-col">
+                    <textarea
+                      value={responses[currentQuestion.id] || ''}
+                      onChange={(e) => setResponses(prev => ({
+                        ...prev,
+                        [currentQuestion.id]: e.target.value
+                      }))}
+                      placeholder="Type your response here..."
+                      className="flex-1 p-4 border border-gray-200 rounded-lg focus:border-teal-500 focus:ring-2 focus:ring-teal-200 resize-none text-sm"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-3">
+                      <span className="font-medium">Word count: {(responses[currentQuestion.id] || '').split(/\s+/).filter(word => word.length > 0).length}</span>
+                      <span>Minimum: 150 words</span>
                     </div>
                   </div>
                 )}
               </div>
-            )}
-
-            {/* Writing Interface */}
-            {selectedType === 'writing' && (
-              <div className="space-y-4">
-                <textarea
-                  value={responses[currentQuestion.id] || ''}
-                  onChange={(e) => setResponses(prev => ({
-                    ...prev,
-                    [currentQuestion.id]: e.target.value
-                  }))}
-                  placeholder="Type your response here..."
-                  className="w-full h-64 p-4 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 resize-none"
-                />
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span className="font-medium">Word count: {(responses[currentQuestion.id] || '').split(/\s+/).filter(word => word.length > 0).length}</span>
-                  <span>Minimum: 150 words</span>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
+        </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between">
+        {/* Fixed Footer - Action Buttons */}
+        <div className="bg-white border-t border-gray-200 px-6 py-4 flex-shrink-0">
+          <div className="max-w-6xl mx-auto flex justify-between items-center">
             <button
               onClick={resetSession}
-              className="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:border-gray-300 transition-colors font-medium"
+              className="border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
             >
               Exit Session
             </button>
@@ -339,9 +404,10 @@ export default function IELTSPractice() {
             <button
               onClick={nextQuestion}
               disabled={!responses[currentQuestion.id]}
-              className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-8 py-2.5 rounded-lg hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold text-sm shadow-md flex items-center space-x-2"
             >
-              Next Question
+              <span>{currentQuestionIndex === selectedQuestions.length - 1 ? 'Complete Session' : 'Next Question'}</span>
+              {currentQuestionIndex < selectedQuestions.length - 1 && <ArrowRight className="w-4 h-4" />}
             </button>
           </div>
         </div>
