@@ -229,6 +229,7 @@ openAIAnalysisService.ts (GPT-4)
 firebaseSessionService.ts (Firestore)
      ↓
 User Dashboard/Progress
+
 ```
 
 ### Key Services
