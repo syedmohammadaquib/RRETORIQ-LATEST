@@ -93,12 +93,12 @@ class SpeechToTextService {
       const formData = new FormData()
       formData.append('file', audioFile)
       formData.append('model', 'whisper-1')
-      
+
       // Set language (use 'auto' for automatic detection)
       if (language !== 'auto') {
         formData.append('language', language)
       }
-      
+
       formData.append('temperature', temperature.toString())
       formData.append('response_format', 'verbose_json') // Get detailed response with confidence
 
@@ -120,7 +120,7 @@ class SpeechToTextService {
           status: response.status,
           error: errorData.error
         })
-        
+
         // Provide specific error messages
         if (response.status === 401) {
           throw new Error('Invalid OpenAI API key. Please check your VITE_OPENAI_API_KEY in .env file')
@@ -129,7 +129,7 @@ class SpeechToTextService {
         } else if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please wait a moment and try again')
         }
-        
+
         throw new Error(`Whisper API error: ${errorData.error?.message || response.statusText}`)
       }
 

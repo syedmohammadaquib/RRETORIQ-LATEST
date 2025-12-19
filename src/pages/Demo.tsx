@@ -53,15 +53,46 @@ const Demo: React.FC = () => {
   const audioChunksRef = React.useRef<Blob[]>([])
   const timerRef = React.useRef<NodeJS.Timeout | null>(null)
 
-  const communicationQuestion: InterviewQuestion = {
-    id: 'comm-demo-1',
-    question: "Present your ideas on improving team collaboration in a remote work environment.",
-    type: 'behavioral',
-    difficulty: 'medium',
-    skills: ['Communication', 'Leadership', 'Problem-solving', 'Teamwork'],
-    expectedDuration: 120,
-    category: 'Professional Communication'
-  }
+  const communicationQuestions: InterviewQuestion[] = [
+    {
+      id: 'comm-demo-1',
+      question: 'Present your ideas on improving team collaboration in a remote work environment.',
+      type: 'behavioral',
+      difficulty: 'medium',
+      skills: ['Communication', 'Leadership', 'Problem-solving', 'Teamwork'],
+      expectedDuration: 120,
+      category: 'Professional Communication'
+    },
+    {
+      id: 'comm-demo-2',
+      question: 'Explain a complex idea to a non-technical audience in under two minutes.',
+      type: 'behavioral',
+      difficulty: 'medium',
+      skills: ['Clarity', 'Storytelling', 'Audience awareness'],
+      expectedDuration: 120,
+      category: 'Professional Communication'
+    },
+    {
+      id: 'comm-demo-3',
+      question: 'Handle a stakeholder disagreement during a presentation and keep the room aligned.',
+      type: 'behavioral',
+      difficulty: 'medium',
+      skills: ['Conflict resolution', 'Executive presence', 'Influence'],
+      expectedDuration: 120,
+      category: 'Professional Communication'
+    },
+    {
+      id: 'comm-demo-4',
+      question: 'Deliver a concise project update highlighting risks, blockers, and next steps.',
+      type: 'behavioral',
+      difficulty: 'medium',
+      skills: ['Conciseness', 'Risk communication', 'Prioritization'],
+      expectedDuration: 120,
+      category: 'Professional Communication'
+    }
+  ]
+
+  const communicationQuestion = communicationQuestions[0]
 
   const interviewQuestion: InterviewQuestion = {
     id: 'interview-demo-1',
@@ -234,8 +265,8 @@ const Demo: React.FC = () => {
               <button
                 onClick={() => setActiveDemo('communication')}
                 className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-medium text-base transition-all duration-300 ${activeDemo === 'communication'
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
-                    : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
+                  : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
               >
                 <Target className="w-5 h-5" />
@@ -245,8 +276,8 @@ const Demo: React.FC = () => {
               <button
                 onClick={() => setActiveDemo('interview')}
                 className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-medium text-base transition-all duration-300 ${activeDemo === 'interview'
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
-                    : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25'
+                  : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
               >
                 <Users className="w-5 h-5" />
@@ -302,11 +333,18 @@ const Demo: React.FC = () => {
                 <div className="grid lg:grid-cols-2 gap-8">
                   {/* Question Card */}
                   <div className="space-y-6">
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Sample Question</h4>
-                      <div className={`rounded-2xl p-4 mb-4 ${demoState.isRecording ? 'bg-red-50 border-2 border-red-200' : 'bg-gray-50'}`}>
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="text-gray-900 font-medium">{communicationQuestion.question}</p>
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 space-y-4">
+                      <h4 className="text-lg font-semibold text-gray-900">Sample Questions</h4>
+                      <div className={`rounded-2xl p-4 ${demoState.isRecording ? 'bg-red-50 border-2 border-red-200' : 'bg-gray-50'}`}>
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="space-y-3 text-gray-900 font-medium">
+                            {communicationQuestions.map((q, idx) => (
+                              <div key={q.id} className="flex items-start space-x-2">
+                                <span className="mt-0.5 text-gray-400">{idx + 1}.</span>
+                                <span className="leading-snug">{q.question}</span>
+                              </div>
+                            ))}
+                          </div>
                           {demoState.isRecording && (
                             <div className="flex items-center space-x-2">
                               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
