@@ -339,9 +339,18 @@ const Demo: React.FC = () => {
                         <div className="flex items-start justify-between mb-3">
                           <div className="space-y-3 text-gray-900 font-medium">
                             {communicationQuestions.map((q, idx) => (
-                              <div key={q.id} className="flex items-start space-x-2">
-                                <span className="mt-0.5 text-gray-400">{idx + 1}.</span>
-                                <span className="leading-snug">{q.question}</span>
+                              <div
+                                key={q.id}
+                                className="rounded-xl border border-gray-200 bg-white/70 px-4 py-3 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all"
+                              >
+                                <div className="flex items-start gap-3">
+                                  <span className="w-7 h-7 flex items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold border border-indigo-100">
+                                    {idx + 1}
+                                  </span>
+                                  <div className="space-y-1">
+                                    <p className="leading-snug text-gray-900">{q.question}</p>
+                                  </div>
+                                </div>
                               </div>
                             ))}
                           </div>
