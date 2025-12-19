@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import WordPhraseCard from '../components/WordPhraseCard'
-import { 
-  ArrowRight, 
-  Target, 
-  Users, 
-  BarChart3, 
+import {
+  ArrowRight,
+  Target,
+  Users,
+  BarChart3,
   Play,
   Sparkles,
   Star
@@ -15,7 +15,7 @@ import { useFadeInOnMount, useScrollAnimation, useStaggerAnimation } from '../ho
 
 export default function Home() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
-  
+
   // SEO Data
   const seoData = {
     home: {
@@ -25,7 +25,7 @@ export default function Home() {
       canonicalUrl: "https://rretoriq.com"
     }
   }
-  
+
   // Animation refs
   const heroRef = useFadeInOnMount(0.2)
   const featuresRef = useScrollAnimation('fadeIn')
@@ -64,7 +64,7 @@ export default function Home() {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
     }, 5000)
-    
+
     return () => clearInterval(interval)
   }, [testimonials.length])
 
@@ -73,20 +73,20 @@ export default function Home() {
       <SEO {...seoData.home} />
       <div className="min-h-screen bg-white text-gray-900 overflow-hidden">
         {/* Hero Section */}
-        <section className="relative pt-32 pb-24 px-4">
+        <section className="relative pt-10 sm:pt-10 lg:pt-10 pb-24 px-4">
           <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 via-white to-gray-50/30"></div>
-          
+
           <div ref={heroRef} className="relative max-w-7xl mx-auto">
             <div className="text-center mb-20">
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extralight mb-8 leading-tight tracking-wide font-serif" style={{ color: '#000000' }}>
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-semibold mb-8 leading-tight tracking-wide font-serif text-brand-gradient-dark drop-shadow-sm">
                 Rretoriq
               </h1>
-              
+
               <div className="inline-flex items-center space-x-2 bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-full text-sm font-medium mb-10 border border-indigo-200 shadow-sm hover:shadow-md transition-shadow duration-300">
                 <Sparkles className="w-4 h-4" />
                 <span>Bridging communication with Intelligence</span>
               </div>
-              
+
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light text-gray-900 mb-10 leading-tight tracking-tight">
                 Master Professional{' '}
                 <span className="font-medium bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
@@ -95,12 +95,12 @@ export default function Home() {
                 <br />
                 <span className="font-light">with AI-Powered Training</span>
               </h2>
-              
+
               <p className="text-xl text-gray-600 mb-14 max-w-3xl mx-auto leading-relaxed font-light">
-                Excel in job interviews, workplace communication, and professional presentations. 
+                Excel in job interviews, workplace communication, and professional presentations.
                 Enhance your grammar, vocabulary, and speaking confidence with personalized AI coaching.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
                 <Link
                   to="/register"
@@ -109,7 +109,7 @@ export default function Home() {
                   <span>Start Your Journey</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
-                
+
                 <Link
                   to="/demo"
                   className="group border-2 border-gray-300 hover:border-indigo-500 text-gray-700 hover:text-indigo-600 px-10 py-4 rounded-full font-medium text-lg transition-all duration-300 hover:bg-indigo-50 hover:shadow-lg flex items-center space-x-2"
@@ -201,11 +201,11 @@ export default function Home() {
                     <Star key={i} className="w-7 h-7 text-yellow-400 fill-current drop-shadow-sm" />
                   ))}
                 </div>
-                
+
                 <blockquote className="text-xl md:text-2xl font-light text-gray-900 mb-10 leading-relaxed">
                   "{testimonials[currentTestimonial].content}"
                 </blockquote>
-                
+
                 <div className="flex items-center justify-center space-x-5">
                   <img
                     src={testimonials[currentTestimonial].image}
@@ -232,9 +232,8 @@ export default function Home() {
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`h-3 rounded-full transition-all duration-300 shadow-sm ${
-                    index === currentTestimonial ? 'w-10 bg-indigo-600' : 'w-3 bg-gray-300 hover:bg-gray-400'
-                  }`}
+                  className={`h-3 rounded-full transition-all duration-300 shadow-sm ${index === currentTestimonial ? 'w-10 bg-indigo-600' : 'w-3 bg-gray-300 hover:bg-gray-400'
+                    }`}
                 />
               ))}
             </div>
@@ -248,11 +247,11 @@ export default function Home() {
               Ready to transform your{' '}
               <span className="font-medium">communication skills?</span>
             </h2>
-            
+
             <p className="text-lg text-indigo-100 mb-14 max-w-2xl mx-auto font-light leading-relaxed">
               Join thousands of professionals who have accelerated their careers with Bridging communication with Intelligence. Start your journey today.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-5 justify-center">
               <Link
                 to="/register"

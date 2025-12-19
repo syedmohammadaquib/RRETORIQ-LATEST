@@ -11,7 +11,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "deploy:firebase": "npm run build && firebase deploy --only hosting,functions"
+    "deploy:firebase": "npm run build && firebase deploy --only hosting,functions --project rretoriq-f10d4"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
