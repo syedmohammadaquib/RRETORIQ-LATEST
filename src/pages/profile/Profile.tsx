@@ -6,12 +6,11 @@ import { useAuthStore } from '../../store/authStore'
 import { userProfileService, type UserProfile, type UserStats } from '../../services/userProfileService'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '../../lib/firebase'
-import { parseResumeWithGemini } from '../../services/resumeParsingService'
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
   Calendar,
   Briefcase,
   GraduationCap,
@@ -24,10 +23,7 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Loader2,
-  Upload,
-  FileText,
-  Sparkles
+  Loader2
 } from 'lucide-react'
 
 const profileSchema = z.object({
@@ -63,11 +59,8 @@ export default function Profile() {
   })
   const [photoURL, setPhotoURL] = useState<string | null>(null)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
-  const [isParsingResume, setIsParsingResume] = useState(false)
-  const [resumeParseSuccess, setResumeParseSuccess] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const resumeInputRef = useRef<HTMLInputElement>(null)
-  
+
   // Preferences state
   const [preferences, setPreferences] = useState({
     learningGoal: 'IELTS Preparation',
@@ -79,7 +72,7 @@ export default function Profile() {
     language: 'English',
     timezone: 'UTC'
   })
-  
+
   // Notifications state
   const [notifications, setNotifications] = useState({
     email: {
@@ -116,14 +109,14 @@ export default function Profile() {
   useEffect(() => {
     const loadUserData = async () => {
       if (!user) return
-      
+
       setLoading(true)
       try {
         const [profile, stats] = await Promise.all([
           userProfileService.getUserProfile(user.id),
           userProfileService.getUserStats(user.id)
         ])
-        
+
         // If no profile exists, create one
         if (!profile) {
           await userProfileService.createUserProfile(user.id, user.email!, {
@@ -131,23 +124,23 @@ export default function Profile() {
             lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
             displayName: user.displayName || ''
           })
-          
+
           // Reload profile after creation
           const newProfile = await userProfileService.getUserProfile(user.id)
           setUserProfile(newProfile)
         } else {
           setUserProfile(profile)
         }
-        
+
         setUserStats(stats)
-        
+
         // Set photo URL if available
         if (profile?.photoURL) {
           setPhotoURL(profile.photoURL)
         } else if (user.photoURL) {
           setPhotoURL(user.photoURL)
         }
-        
+
         // Update form with profile data
         if (profile || user) {
           const formData = {
@@ -177,7 +170,7 @@ export default function Profile() {
 
   const onSubmit = async (data: ProfileForm) => {
     if (!user) return
-    
+
     setIsSaving(true)
     try {
       await userProfileService.updateUserProfile(user.id, {
@@ -193,11 +186,11 @@ export default function Profile() {
         bio: data.bio,
         displayName: `${data.firstName} ${data.lastName}`.trim()
       })
-      
+
       // Reload profile data
       const updatedProfile = await userProfileService.getUserProfile(user.id)
       setUserProfile(updatedProfile)
-      
+
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (error) {
@@ -209,17 +202,17 @@ export default function Profile() {
 
   const savePreferences = async () => {
     if (!user) return
-    
+
     setIsSaving(true)
     try {
       await userProfileService.updateUserProfile(user.id, {
         preferences: preferences
       })
-      
+
       // Reload profile data
       const updatedProfile = await userProfileService.getUserProfile(user.id)
       setUserProfile(updatedProfile)
-      
+
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (error) {
@@ -231,17 +224,17 @@ export default function Profile() {
 
   const saveNotifications = async () => {
     if (!user) return
-    
+
     setIsSaving(true)
     try {
       await userProfileService.updateUserProfile(user.id, {
         notifications: notifications
       })
-      
+
       // Reload profile data
       const updatedProfile = await userProfileService.getUserProfile(user.id)
       setUserProfile(updatedProfile)
-      
+
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (error) {
@@ -290,41 +283,6 @@ export default function Profile() {
     }
   }
 
-  const handleResumeUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !user) return
-
-    setIsParsingResume(true)
-    setResumeParseSuccess(false)
-    
-    try {
-      const parsedData = await parseResumeWithGemini(file)
-      
-      // Auto-populate form fields using setValue
-      if (parsedData.firstName) reset((current) => ({ ...current, firstName: parsedData.firstName! }))
-      if (parsedData.lastName) reset((current) => ({ ...current, lastName: parsedData.lastName! }))
-      if (parsedData.phone) reset((current) => ({ ...current, phone: parsedData.phone! }))
-      if (parsedData.location) reset((current) => ({ ...current, location: parsedData.location! }))
-      if (parsedData.occupation) reset((current) => ({ ...current, occupation: parsedData.occupation! }))
-      if (parsedData.company) reset((current) => ({ ...current, company: parsedData.company! }))
-      if (parsedData.education) reset((current) => ({ ...current, education: parsedData.education! }))
-      if (parsedData.languages && Array.isArray(parsedData.languages)) {
-        reset((current) => ({ ...current, languages: parsedData.languages!.join(', ') }))
-      }
-      if (parsedData.bio) reset((current) => ({ ...current, bio: parsedData.bio! }))
-      
-      setResumeParseSuccess(true)
-      setTimeout(() => setResumeParseSuccess(false), 5000)
-    } catch (error) {
-      console.error('Failed to parse resume:', error)
-      alert(error instanceof Error ? error.message : 'Failed to parse resume. Please try again.')
-    } finally {
-      setIsParsingResume(false)
-      // Reset file input
-      if (event.target) event.target.value = ''
-    }
-  }
-
   const tabs = [
     { id: 'personal', label: 'Personal Info', icon: User },
     { id: 'preferences', label: 'Preferences', icon: Settings },
@@ -358,9 +316,9 @@ export default function Profile() {
                 className="hidden"
               />
               {photoURL ? (
-                <img 
-                  src={photoURL} 
-                  alt="Profile" 
+                <img
+                  src={photoURL}
+                  alt="Profile"
                   className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
@@ -368,7 +326,7 @@ export default function Profile() {
                   <User className="w-10 h-10 text-white" />
                 </div>
               )}
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPhoto}
                 className="absolute -bottom-1 -right-1 bg-white text-indigo-600 p-1.5 rounded-full hover:bg-indigo-50 transition-colors disabled:opacity-50 shadow-lg"
@@ -380,13 +338,13 @@ export default function Profile() {
                 )}
               </button>
             </div>
-            
+
             <div className="text-center md:text-left flex-1">
               <h1 className="text-2xl font-bold text-white mb-2">
-                {loading ? 'Loading...' : 
-                 (userProfile?.displayName || user?.displayName || 
-                  `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() || 
-                  user?.email?.split('@')[0] || 'User')}
+                {loading ? 'Loading...' :
+                  (userProfile?.displayName || user?.displayName ||
+                    `${userProfile?.firstName || ''} ${userProfile?.lastName || ''}`.trim() ||
+                    user?.email?.split('@')[0] || 'User')}
               </h1>
               <p className="text-white/90 mb-1">{user?.email}</p>
               {userProfile?.institutionName && (
@@ -434,11 +392,10 @@ export default function Profile() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all ${
-                        activeTab === tab.id
+                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all ${activeTab === tab.id
                           ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
                           : 'text-gray-700 hover:bg-purple-50'
-                      }`}
+                        }`}
                     >
                       <IconComponent className="w-4 h-4" />
                       <span className="font-medium text-sm">{tab.label}</span>
@@ -462,60 +419,6 @@ export default function Profile() {
                         <span className="text-sm font-medium">Profile updated successfully!</span>
                       </div>
                     )}
-                  </div>
-
-                  {/* AI Resume Upload Banner */}
-                  <div className="mb-8 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                            <Sparkles className="w-6 h-6 text-white" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-base font-semibold text-gray-900 mb-1">
-                            Auto-fill from Resume
-                          </h3>
-                          <p className="text-sm text-gray-600 mb-3">
-                            Upload your resume and let AI automatically populate your profile fields
-                          </p>
-                          <input
-                            ref={resumeInputRef}
-                            type="file"
-                            accept=".pdf,.doc,.docx,.txt"
-                            onChange={handleResumeUpload}
-                            disabled={isParsingResume}
-                            className="hidden"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => resumeInputRef.current?.click()}
-                            disabled={isParsingResume}
-                            className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {isParsingResume ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span>Analyzing Resume...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Upload className="w-4 h-4" />
-                                <span>Upload Resume</span>
-                              </>
-                            )}
-                          </button>
-                          {resumeParseSuccess && (
-                            <div className="mt-3 flex items-center space-x-2 text-emerald-600">
-                              <CheckCircle className="w-4 h-4" />
-                              <span className="text-sm font-medium">Resume parsed successfully! Fields have been auto-filled.</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <FileText className="w-8 h-8 text-purple-300" />
-                    </div>
                   </div>
 
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -720,7 +623,7 @@ export default function Profile() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="space-y-8">
                     <div>
                       <label className="block text-sm font-medium text-gray-600 mb-4">
@@ -729,10 +632,10 @@ export default function Profile() {
                       <div className="space-y-3">
                         {['IELTS Preparation', 'Job Interview Skills', 'Business Communication', 'General English'].map((goal) => (
                           <label key={goal} className="flex items-center">
-                            <input 
-                              type="radio" 
-                              name="learning-goal" 
-                              className="mr-3 text-gray-600" 
+                            <input
+                              type="radio"
+                              name="learning-goal"
+                              className="mr-3 text-gray-600"
                               checked={goal === preferences.learningGoal}
                               onChange={() => setPreferences(prev => ({ ...prev, learningGoal: goal }))}
                             />
@@ -746,7 +649,7 @@ export default function Profile() {
                       <label className="block text-sm font-medium text-gray-600 mb-4">
                         Practice Frequency
                       </label>
-                      <select 
+                      <select
                         className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-gray-400 focus:ring-0 text-white bg-gray-700"
                         value={preferences.practiceFrequency}
                         onChange={(e) => setPreferences(prev => ({ ...prev, practiceFrequency: e.target.value }))}
@@ -765,10 +668,10 @@ export default function Profile() {
                       <div className="flex space-x-6">
                         {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
                           <label key={level} className="flex items-center">
-                            <input 
-                              type="radio" 
-                              name="difficulty" 
-                              className="mr-3 text-gray-600" 
+                            <input
+                              type="radio"
+                              name="difficulty"
+                              className="mr-3 text-gray-600"
                               checked={level === preferences.difficultyLevel}
                               onChange={() => setPreferences(prev => ({ ...prev, difficultyLevel: level }))}
                             />
@@ -780,9 +683,9 @@ export default function Profile() {
 
                     <div className="space-y-4">
                       <label className="flex items-center">
-                        <input 
-                          type="checkbox" 
-                          className="mr-3 text-gray-600" 
+                        <input
+                          type="checkbox"
+                          className="mr-3 text-gray-600"
                           checked={preferences.enableVoiceFeedback}
                           onChange={(e) => setPreferences(prev => ({ ...prev, enableVoiceFeedback: e.target.checked }))}
                         />
@@ -790,9 +693,9 @@ export default function Profile() {
                       </label>
 
                       <label className="flex items-center">
-                        <input 
-                          type="checkbox" 
-                          className="mr-3 text-gray-600" 
+                        <input
+                          type="checkbox"
+                          className="mr-3 text-gray-600"
                           checked={preferences.showAnalytics}
                           onChange={(e) => setPreferences(prev => ({ ...prev, showAnalytics: e.target.checked }))}
                         />
@@ -829,16 +732,16 @@ export default function Profile() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="space-y-8">
                     <div className="border border-gray-200 rounded-lg p-6">
                       <h3 className="font-medium text-gray-900 mb-4">Email Notifications</h3>
                       <div className="space-y-4">
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">Practice reminders</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.email.practiceReminders}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -848,9 +751,9 @@ export default function Profile() {
                         </label>
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">Progress reports</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.email.progressReports}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -860,9 +763,9 @@ export default function Profile() {
                         </label>
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">New features</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.email.newFeatures}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -878,9 +781,9 @@ export default function Profile() {
                       <div className="space-y-4">
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">Daily practice reminder</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.push.dailyReminder}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -890,9 +793,9 @@ export default function Profile() {
                         </label>
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">Achievement unlocked</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.push.achievements}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -902,9 +805,9 @@ export default function Profile() {
                         </label>
                         <label className="flex items-center justify-between">
                           <span className="text-gray-700 text-sm">Session completed</span>
-                          <input 
-                            type="checkbox" 
-                            className="text-gray-600" 
+                          <input
+                            type="checkbox"
+                            className="text-gray-600"
                             checked={notifications.push.sessionCompleted}
                             onChange={(e) => setNotifications(prev => ({
                               ...prev,
@@ -948,7 +851,7 @@ export default function Profile() {
               {activeTab === 'security' && (
                 <div>
                   <h2 className="text-lg font-medium text-gray-900 mb-8">Security Settings</h2>
-                  
+
                   <div className="space-y-8">
                     <div className="border border-gray-200 rounded-lg p-6">
                       <h3 className="font-medium text-gray-900 mb-3">Change Password</h3>
@@ -992,7 +895,7 @@ export default function Profile() {
                         <button className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 text-sm">
                           Download my data
                         </button>
-                        <button 
+                        <button
                           onClick={logout}
                           className="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 text-sm"
                         >
