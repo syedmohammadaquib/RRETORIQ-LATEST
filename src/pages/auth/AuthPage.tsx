@@ -157,7 +157,7 @@ export default function AuthPage() {
                     {/* Right side - Form */}
                     <div className="flex flex-col overflow-y-auto">
                         <div className="p-6 flex-1">
-                            <div className="text-center mb-4">
+                            <div className="text-center mb-8">
                                 <h2 className="text-2xl font-bold text-gray-900">
                                     {activeTab === 'login' ? 'Sign in to your account' : 'Create a new account'}
                                 </h2>
@@ -175,7 +175,7 @@ export default function AuthPage() {
                             </div>
 
                             {/* Social Login */}
-                            <div className="mb-3">
+                            <div className="mb-6">
                                 <button
                                     onClick={handleGoogleAuth}
                                     type="button"
@@ -193,7 +193,7 @@ export default function AuthPage() {
                                 </button>
                             </div>
 
-                            <div className="mb-3">
+                            <div className="mb-6">
                                 <div className="relative">
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="w-full border-t border-gray-300"></div>
@@ -208,7 +208,7 @@ export default function AuthPage() {
 
                             {/* Error Display */}
                             {error && (
-                                <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start space-x-2">
+                                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start space-x-3">
                                     <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                                     <span className="text-red-700 text-xs">{error}</span>
                                 </div>
@@ -218,9 +218,9 @@ export default function AuthPage() {
                             <div>
                                 {activeTab === 'login' ? (
                                     // Login Form
-                                    <form onSubmit={handleLoginSubmit(onLogin)} className="space-y-2.5">
+                                    <form onSubmit={handleLoginSubmit(onLogin)} className="space-y-5">
                                         <div>
-                                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                                                 Email address
                                             </label>
                                             <div className="relative">
@@ -232,7 +232,7 @@ export default function AuthPage() {
                                                     type="email"
                                                     id="email"
                                                     placeholder="you@company.com"
-                                                    className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                                    className="w-full pl-9 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                                 />
                                             </div>
                                             {loginErrors.email && (
@@ -241,7 +241,7 @@ export default function AuthPage() {
                                         </div>
 
                                         <div>
-                                            <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center justify-between mb-2">
                                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                                     Password
                                                 </label>
@@ -258,7 +258,7 @@ export default function AuthPage() {
                                                     type={showPassword ? 'text' : 'password'}
                                                     id="password"
                                                     placeholder="Enter your password"
-                                                    className="w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                                    className="w-full pl-9 pr-10 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                                 />
                                                 <button
                                                     type="button"
@@ -278,11 +278,11 @@ export default function AuthPage() {
                                             )}
                                         </div>
 
-                                        <div className="pt-2">
+                                        <div className="pt-6">
                                             <button
                                                 type="submit"
                                                 disabled={isLoading}
-                                                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {isLoading ? (
                                                     <Loader className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
@@ -293,7 +293,7 @@ export default function AuthPage() {
                                             </button>
                                         </div>
 
-                                        <div className="text-center text-xs text-gray-500 pt-2">
+                                        <div className="text-center text-xs text-gray-500 pt-4">
                                             Don't have an account?{' '}
                                             <button
                                                 type="button"
@@ -306,10 +306,10 @@ export default function AuthPage() {
                                     </form>
                                 ) : (
                                     // Register Form
-                                    <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-3">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-5">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label htmlFor="firstName" className="block text-xs font-medium text-gray-700 mb-1">
+                                                <label htmlFor="firstName" className="block text-xs font-medium text-gray-700 mb-2">
                                                     First name
                                                 </label>
                                                 <div className="relative">
@@ -463,11 +463,11 @@ export default function AuthPage() {
                                             )}
                                         </div>
 
-                                        <div className="pt-2">
+                                        <div className="pt-4">
                                             <button
                                                 type="submit"
                                                 disabled={isLoading}
-                                                className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {isLoading ? (
                                                     <Loader className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
@@ -478,7 +478,7 @@ export default function AuthPage() {
                                             </button>
                                         </div>
 
-                                        <div className="text-center text-xs text-gray-500 pt-1">
+                                        <div className="text-center text-xs text-gray-500 pt-4">
                                             Already have an account?{' '}
                                             <button
                                                 type="button"
