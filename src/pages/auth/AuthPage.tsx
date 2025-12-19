@@ -103,18 +103,7 @@ export default function AuthPage() {
         try {
             clearError();
             const { confirmPassword, ...credentials } = data;
-            await registerUser({
-                ...credentials,
-                displayName: `${data.firstName} ${data.lastName}`,
-                phone: data.phone,
-                location: data.location,
-                dateOfBirth: data.dateOfBirth,
-                occupation: data.occupation,
-                education: data.education,
-                languages: data.languages,
-                bio: data.bio,
-                college: data.college
-            });
+            await registerUser(credentials);
         } catch (error) {
             console.error('Registration failed:', error);
         }

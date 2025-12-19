@@ -315,7 +315,11 @@ export const useAuthStore = create<AuthStore>()(
           await userProfileService.createUserProfile(
             userCredential.user.uid,
             userCredential.user.email!,
-            userProfileData
+            {
+              ...userProfileData,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }
           )
 
           const user = await convertFirebaseUser(userCredential.user, true)
