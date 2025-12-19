@@ -16,7 +16,6 @@ Deployed to: `https://rretoriq-backend-api.vercel.app/api/admin/`
 | `/api/admin/add-student` | POST | Add student by username | ✅ Deployed |
 | `/api/admin/remove-student` | POST | Remove student from institution | ✅ Deployed |
 | `/api/admin/get-institution` | GET | Fetch institution data | ✅ Deployed |
-
 ### **Frontend**
 Deployed to: `https://rretoriq25.web.app`
 
