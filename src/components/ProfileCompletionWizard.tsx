@@ -55,7 +55,6 @@ export const ProfileCompletionWizard: React.FC = () => {
     handleSubmit,
     formState: { errors },
     trigger,
-    setValue,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
