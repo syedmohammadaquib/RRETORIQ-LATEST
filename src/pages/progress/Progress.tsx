@@ -239,7 +239,15 @@ export default function Progress() {
           <div className="flex flex-col sm:flex-row gap-3 mt-4 lg:mt-0">
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={(e) => {
+                const range = e.target.value
+                setTimeRange(range)
+                if (range === 'week') {
+                  setViewType('overview')
+                } else {
+                  setViewType('detailed')
+                }
+              }}
               className="px-3 sm:px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-300 text-xs sm:text-sm font-medium bg-white/80 backdrop-blur-sm"
             >
               <option value="week">Last 7 Days</option>
@@ -250,7 +258,10 @@ export default function Progress() {
 
             <div className="flex gap-1">
               <button
-                onClick={() => setViewType('overview')}
+                onClick={() => {
+                  setViewType('overview')
+                  setTimeRange('week')
+                }}
                 className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewType === 'overview'
                   ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                   : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
@@ -260,7 +271,10 @@ export default function Progress() {
                 <span className="hidden sm:inline">Overview</span>
               </button>
               <button
-                onClick={() => setViewType('detailed')}
+                onClick={() => {
+                  setViewType('detailed')
+                  if (timeRange === 'week') setTimeRange('month')
+                }}
                 className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewType === 'detailed'
                   ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                   : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
