@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
+import {
   Play,
-  Mic, 
+  Mic,
   Clock,
   BookOpen,
   CheckCircle,
@@ -47,6 +47,7 @@ export default function IELTSPractice() {
   const [audioStartTime, setAudioStartTime] = useState<number | null>(null)
   const [writingDifficulty, setWritingDifficulty] = useState<'Easy' | 'Medium' | 'Hard' | null>(null)
 
+  const isReading = selectedType === 'reading'
 
   const skillTypes = [
     {
@@ -105,30 +106,37 @@ export default function IELTSPractice() {
 
   const handleAnalysisComplete = async (analysisResult: AnswerAnalysis) => {
     setAnalysis(analysisResult)
-    
+
+    // Determine current active question (Speaking or Reading)
+    const activeQuestionId = isReading && currentReadingQuestion ? currentReadingQuestion.id : currentQuestion?.id
+    const activeQuestionText = isReading && currentReadingQuestion
+      ? `Reading: ${currentReadingQuestion.title}`
+      : currentQuestion?.question
+
     // Store analysis for session summary
-    if (currentQuestion) {
+    if (activeQuestionId) {
       setAllAnalyses(prev => ({
         ...prev,
-        [currentQuestion.id]: analysisResult
+        [activeQuestionId]: analysisResult
       }))
-      
+
       // Mark response as complete
       setResponses(prev => ({
         ...prev,
-        [currentQuestion.id]: 'Response recorded and analyzed'
+        [activeQuestionId]: 'Response recorded and analyzed'
       }))
-      
+
       // Save to Firebase if session is active
       if (sessionId && auth.currentUser && currentTranscription) {
         try {
-          const audioDuration = audioStartTime ? Math.round((Date.now() - audioStartTime) / 1000) : currentQuestion.timeLimit
-          
+          const timeLimit = isReading && currentReadingQuestion ? 90 : (currentQuestion?.timeLimit || 60)
+          const audioDuration = audioStartTime ? Math.round((Date.now() - audioStartTime) / 1000) : timeLimit
+
           await firebaseSessionService.saveAnswer(sessionId, {
-            questionId: currentQuestion.id,
-            questionText: currentQuestion.question,
-            questionType: 'speaking',
-            difficulty: currentQuestion.difficulty.toLowerCase(),
+            questionId: activeQuestionId,
+            questionText: activeQuestionText || 'Unknown Question',
+            questionType: isReading ? 'reading' : 'speaking',
+            difficulty: isReading ? 'medium' : (currentQuestion?.difficulty.toLowerCase() || 'medium'),
             transcription: currentTranscription,
             analysis: analysisResult,
             audioDuration: audioDuration
@@ -153,19 +161,19 @@ export default function IELTSPractice() {
       alert('Please log in to start a practice session.')
       return
     }
-    
+
     // Check session limits before starting
     const limitCheck = await sessionLimitService.canStartSession(
-      auth.currentUser.uid, 
+      auth.currentUser.uid,
       'practice',
       selectedType
     )
-    
+
     if (!limitCheck.allowed) {
       alert(limitCheck.reason || 'You have reached your monthly limit for this session type.')
       return
     }
-    
+
     // Enforce question limits for reading and writing
     let questionCount = preferences.numberOfQuestions
     if (selectedType === 'reading') {
@@ -173,11 +181,11 @@ export default function IELTSPractice() {
     } else if (selectedType === 'writing') {
       questionCount = Math.min(questionCount, 2) // Max 2 questions for writing
     }
-    
+
     setShowPreferences(false)
     setSessionStarted(true)
     setSessionStartTime(new Date())
-    
+
     // Create Firebase session
     try {
       const newSessionId = await firebaseSessionService.createSession(
@@ -191,7 +199,7 @@ export default function IELTSPractice() {
     } catch (error) {
       console.error('❌ Failed to create session:', error)
     }
-    
+
     // Filter questions by selected difficulty for speaking
     if (selectedType === 'speaking') {
       const filteredQuestions = speakingQuestions.filter(
@@ -203,7 +211,7 @@ export default function IELTSPractice() {
       setCurrentQuestion(selected[0])
       setCurrentQuestionIndex(0)
     }
-    
+
     // For reading - no difficulty filter, random selection, max 3 questions
     if (selectedType === 'reading') {
       const shuffled = [...readingImageQuestions].sort(() => 0.5 - Math.random())
@@ -217,17 +225,17 @@ export default function IELTSPractice() {
 
   const nextQuestion = async () => {
     const totalQuestions = selectedType === 'reading' ? selectedReadingQuestions.length : selectedQuestions.length
-    
+
     if (currentQuestionIndex < totalQuestions - 1) {
       const nextIndex = currentQuestionIndex + 1
       setCurrentQuestionIndex(nextIndex)
-      
+
       if (selectedType === 'reading') {
         setCurrentReadingQuestion(selectedReadingQuestions[nextIndex])
       } else {
         setCurrentQuestion(selectedQuestions[nextIndex])
       }
-      
+
       setAnalysis(null)
       setCurrentTranscription(null)
       setAudioStartTime(null)
@@ -256,7 +264,7 @@ export default function IELTSPractice() {
         analyses: analyses,
         sessionType: 'communication-practice'
       })
-      
+
       console.log('✅ Session completed successfully')
     } catch (error) {
       console.error('❌ Failed to complete session:', error)
@@ -347,7 +355,7 @@ export default function IELTSPractice() {
     const isReading = selectedType === 'reading'
     const totalQuestions = isReading ? selectedReadingQuestions.length : selectedQuestions.length
     const questionId = isReading ? currentReadingQuestion?.id : currentQuestion?.id
-    
+
     return (
       <div className="h-screen flex flex-col bg-gradient-to-br from-teal-50 to-cyan-50">
         {/* Fixed Header */}
@@ -366,9 +374,8 @@ export default function IELTSPractice() {
                   Let's Communicate
                 </h1>
                 {!isReading && currentQuestion && (
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
-                    currentQuestion.difficulty === 'Easy' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                  }`}>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-md ${currentQuestion.difficulty === 'Easy' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                    }`}>
                     {currentQuestion.difficulty}
                   </span>
                 )}
@@ -382,10 +389,10 @@ export default function IELTSPractice() {
                 Question {currentQuestionIndex + 1}/{totalQuestions}
               </div>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div 
+              <div
                 className="bg-gradient-to-r from-teal-500 to-cyan-600 h-1.5 rounded-full transition-all duration-500"
                 style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
               />
@@ -405,8 +412,8 @@ export default function IELTSPractice() {
                     {/* Image First - Large and Prominent */}
                     <div className="mb-6">
                       <div className="relative w-full bg-gray-100 rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
-                        <img 
-                          src={encodeURI(currentReadingQuestion.imagePath)} 
+                        <img
+                          src={encodeURI(currentReadingQuestion.imagePath)}
                           alt={currentReadingQuestion.theme}
                           className="w-full h-full object-contain"
                           style={{ maxHeight: '500px' }}
@@ -421,7 +428,7 @@ export default function IELTSPractice() {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="mb-4">
                       <h2 className="text-lg font-bold text-gray-900 mb-2">{currentReadingQuestion.theme}</h2>
                       <p className="text-sm text-gray-700 leading-relaxed">{currentReadingQuestion.title}</p>
@@ -431,7 +438,7 @@ export default function IELTSPractice() {
                       <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Instructions</h3>
                       <p className="text-sm text-gray-700 leading-relaxed">{currentReadingQuestion.description}</p>
                     </div>
-                    
+
                     {currentReadingQuestion.suggestedPoints && currentReadingQuestion.suggestedPoints.length > 0 && (
                       <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
                         <p className="text-xs font-semibold text-gray-700 mb-2">💡 Points to Consider:</p>
@@ -478,7 +485,7 @@ export default function IELTSPractice() {
                       <h2 className="text-base font-bold text-gray-900 mb-3">Question</h2>
                       <p className="text-base text-gray-800 leading-relaxed">{currentQuestion.question}</p>
                     </div>
-                    
+
                     {currentQuestion.keyPoints && currentQuestion.keyPoints.length > 0 && (
                       <div className="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
                         <p className="text-xs font-semibold text-gray-700 mb-2">💡 Key Points to Consider:</p>
@@ -509,7 +516,7 @@ export default function IELTSPractice() {
                       autoStop={true}
                       showTranscription={false}
                     />
-                    
+
                     {/* Analysis Results */}
                     {analysis && (
                       <div className="mt-6">
@@ -530,7 +537,7 @@ export default function IELTSPractice() {
                       autoStop={true}
                       showTranscription={false}
                     />
-                    
+
                     {/* Analysis Results - Only show analysis, not transcription */}
                     {analysis && (
                       <div className="mt-6">
@@ -572,11 +579,11 @@ export default function IELTSPractice() {
             >
               Exit Session
             </button>
-            
+
             <button
               onClick={nextQuestion}
               disabled={
-                selectedType === 'writing' 
+                selectedType === 'writing'
                   ? !responses[questionId || '']
                   : !analysis
               }
@@ -625,16 +632,14 @@ export default function IELTSPractice() {
                   <button
                     key={level}
                     onClick={() => setPreferences(prev => ({ ...prev, difficulty: level }))}
-                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                      preferences.difficulty === level
-                        ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
-                    }`}
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${preferences.difficulty === level
+                      ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
+                      : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/50'
+                      }`}
                   >
                     <div className="text-center">
-                      <div className={`text-lg font-bold mb-1 ${
-                        preferences.difficulty === level ? 'text-blue-600' : 'text-gray-700'
-                      }`}>
+                      <div className={`text-lg font-bold mb-1 ${preferences.difficulty === level ? 'text-blue-600' : 'text-gray-700'
+                        }`}>
                         {level}
                       </div>
                       <div className="text-xs text-gray-600">
@@ -658,8 +663,8 @@ export default function IELTSPractice() {
                 min="3"
                 max="10"
                 value={preferences.numberOfQuestions}
-                onChange={(e) => setPreferences(prev => ({ 
-                  ...prev, 
+                onChange={(e) => setPreferences(prev => ({
+                  ...prev,
                   numberOfQuestions: Math.max(3, Math.min(10, parseInt(e.target.value) || 3))
                 }))}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-gray-900 font-medium"
@@ -737,8 +742,8 @@ export default function IELTSPractice() {
             {/* Info Box */}
             <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg mb-6">
               <p className="text-sm text-gray-700 leading-relaxed">
-                📖 In this session, you'll see thought-provoking images representing various themes. 
-                Observe each image carefully and speak about what you see, your interpretation, and your thoughts on the theme. 
+                📖 In this session, you'll see thought-provoking images representing various themes.
+                Observe each image carefully and speak about what you see, your interpretation, and your thoughts on the theme.
                 You'll have <strong>90 seconds</strong> to express yourself for each image.
               </p>
             </div>
@@ -753,8 +758,8 @@ export default function IELTSPractice() {
                 min="3"
                 max="10"
                 value={preferences.numberOfQuestions}
-                onChange={(e) => setPreferences(prev => ({ 
-                  ...prev, 
+                onChange={(e) => setPreferences(prev => ({
+                  ...prev,
                   numberOfQuestions: Math.max(3, Math.min(10, parseInt(e.target.value) || 3))
                 }))}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all text-gray-900 font-medium"
@@ -943,13 +948,12 @@ export default function IELTSPractice() {
           {skillTypes.map((skill) => (
             <div
               key={skill.type}
-              className={`bg-gradient-to-br ${
-                skill.type === 'speaking' 
-                  ? 'from-blue-500 to-indigo-600' 
-                  : skill.type === 'reading'
+              className={`bg-gradient-to-br ${skill.type === 'speaking'
+                ? 'from-blue-500 to-indigo-600'
+                : skill.type === 'reading'
                   ? 'from-purple-500 to-violet-600'
                   : 'from-orange-500 to-amber-600'
-              } rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden`}
+                } rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden`}
               onClick={() => {
                 setSelectedType(skill.type)
                 setShowPreferences(true)
@@ -964,7 +968,7 @@ export default function IELTSPractice() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">{skill.title}</h3>
                 <p className="text-white/90 mb-5 leading-relaxed text-sm">{skill.description}</p>
-                
+
                 <div className="grid grid-cols-3 gap-3 text-xs mb-5">
                   <div className="text-center">
                     <div className="font-bold text-white text-sm">3-4</div>
@@ -979,7 +983,7 @@ export default function IELTSPractice() {
                     <div className="text-white/80">Difficulty</div>
                   </div>
                 </div>
-                
+
                 {/* Monthly Limit Info */}
                 <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mb-4">
                   <p className="text-white/90 text-xs font-medium text-center">{skill.limit}</p>
@@ -1003,7 +1007,7 @@ export default function IELTSPractice() {
               <h3 className="font-bold text-gray-900 mb-2">1. Select & Start</h3>
               <p className="text-sm text-gray-600 leading-relaxed">Choose your skill and begin the practice session with real IELTS-style questions.</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <MessageSquare className="w-7 h-7 text-white" />
@@ -1011,7 +1015,7 @@ export default function IELTSPractice() {
               <h3 className="font-bold text-gray-900 mb-2">2. Practice & Record</h3>
               <p className="text-sm text-gray-600 leading-relaxed">Answer questions with our recording system and receive real-time guidance.</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <CheckCircle className="w-7 h-7 text-white" />

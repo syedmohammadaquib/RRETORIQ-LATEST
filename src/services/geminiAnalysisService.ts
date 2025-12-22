@@ -228,7 +228,7 @@ Return ONLY the JSON object, no additional text.`
 
     } catch (error) {
       const processingTime = Date.now() - startTime
-      console.error('❌ Gemini analysis failed:', error)
+      console.error('❌ Gemini analysis failed FULL DETAILS:', error) // Changed logging
 
       // Return fallback analysis
       return {
@@ -267,7 +267,7 @@ Return ONLY the JSON object, no additional text.`
   generateQuickFeedback(transcript: string, duration: number) {
     const wordCount = transcript.split(/\s+/).filter((w: string) => w.length > 0).length
     const wordsPerMinute = Math.round((wordCount / duration) * 60)
-    
+
     return {
       wordCount,
       duration,

@@ -28,7 +28,9 @@ import {
   MessageSquare,
   BookOpen,
   Building2,
-  GraduationCap
+  GraduationCap,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 interface LayoutProps {
@@ -39,6 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
   const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const [isCollapsed, setIsCollapsed] = React.useState(false)
   const location = useLocation()
   const { user, logout } = useAuthStore()
 
@@ -69,6 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'FAQ', href: '/faq', icon: HelpCircle },
     { name: 'Help Center', href: '/help', icon: Info },
     { name: 'About Us', href: '/about', icon: Users },
+    { name: 'Feedback', href: '/feedback', icon: MessageSquare },
   ]
 
   // Determine which navigation to show based on user role
@@ -93,22 +97,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         )}
 
         {/* Desktop Sidebar */}
-        <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+        <div
+          className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'lg:w-20' : 'lg:w-64'
+            }`}
+        >
           <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-indigo-50 via-purple-50 to-pink-50 border-r border-purple-100 shadow-lg">
             {/* Logo */}
-            <div className="flex items-center px-6 py-6">
+            <div className={`flex items-center h-20 bg-transparent ${isCollapsed ? 'justify-center px-0' : 'px-6'}`}>
               <img
                 src="/resources/Rretoriq_main_blk.png"
                 alt="Rretoriq Logo"
                 className="h-10 w-auto"
               />
-              <span className="ml-3 text-xl font-bold text-gray-900">Rretoriq</span>
+              {!isCollapsed && <span className="ml-3 text-xl font-bold text-gray-900 truncate">Rretoriq</span>}
             </div>
 
+            {/* Toggle Button */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="absolute -right-3 top-24 bg-white border border-purple-100 rounded-full p-1.5 shadow-md hover:bg-purple-50 transition-colors z-50 text-indigo-600"
+            >
+              {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+
             {/* Navigation */}
-            <nav className="mt-8 px-4 flex-1">
+            <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-8 scrollbar-hide">
               {/* Main Navigation */}
-              <div className="mb-6">
+              <div className="space-y-1">
                 {navigation.map((item) => {
                   const Icon = item.icon
                   const isCurrentActive = isActive(item.href)
@@ -116,24 +131,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`group flex items-center px-3 py-2.5 mb-1.5 text-sm font-semibold rounded-xl transition-all duration-200 ${isCurrentActive
+                      title={isCollapsed ? item.name : ''}
+                      className={`group flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 ${isCurrentActive
                         ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                         : 'text-gray-700 hover:text-indigo-600 hover:bg-white/60 hover:shadow-md'
                         }`}
                     >
-                      <Icon className={`w-5 h-5 mr-3 ${isCurrentActive ? 'text-white' : 'text-indigo-500 group-hover:text-indigo-600'
+                      <Icon className={`w-5 h-5 ${!isCollapsed && 'mr-3'} ${isCurrentActive ? 'text-white' : 'text-indigo-500 group-hover:text-indigo-600'
                         }`} />
-                      <span>{item.name}</span>
+                      {!isCollapsed && <span className="font-semibold">{item.name}</span>}
                     </Link>
                   )
                 })}
               </div>
 
               {/* Support Section */}
-              <div className="border-t border-purple-200 pt-4">
-                <div className="px-3 mb-2">
-                  <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Support</span>
-                </div>
+              <div className="space-y-1">
+                {!isCollapsed && (
+                  <div className="px-3 mb-2">
+                    <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Support</span>
+                  </div>
+                )}
                 {supportNavigation.map((item) => {
                   const Icon = item.icon
                   const isCurrentActive = isActive(item.href)
@@ -141,14 +159,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`group flex items-center px-3 py-2.5 mb-1.5 text-sm font-semibold rounded-xl transition-all duration-200 ${isCurrentActive
+                      title={isCollapsed ? item.name : ''}
+                      className={`group flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-3'} py-2.5 rounded-xl transition-all duration-200 ${isCurrentActive
                         ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                         : 'text-gray-700 hover:text-indigo-600 hover:bg-white/60 hover:shadow-md'
                         }`}
                     >
-                      <Icon className={`w-5 h-5 mr-3 ${isCurrentActive ? 'text-white' : 'text-indigo-500 group-hover:text-indigo-600'
+                      <Icon className={`w-5 h-5 ${!isCollapsed && 'mr-3'} ${isCurrentActive ? 'text-white' : 'text-indigo-500 group-hover:text-indigo-600'
                         }`} />
-                      <span>{item.name}</span>
+                      {!isCollapsed && <span className="font-semibold">{item.name}</span>}
                     </Link>
                   )
                 })}
@@ -156,11 +175,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </nav>
 
             {/* User Profile */}
-            <div className="p-4 border-t border-purple-200">
+            <div className={`p-4 border-t border-purple-200 ${isCollapsed ? 'flex justify-center' : ''}`}>
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 rounded-xl hover:bg-white/60 hover:shadow-md transition-all duration-200"
+                  className={`flex items-center ${isCollapsed ? 'justify-center px-0' : 'w-full px-3'} py-2.5 text-sm font-medium text-gray-700 rounded-xl hover:bg-white/60 hover:shadow-md transition-all duration-200`}
                 >
                   {user.photoURL ? (
                     <img
@@ -175,12 +194,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </span>
                     </div>
                   )}
-                  <div className="ml-3 text-left">
-                    <p className="text-sm font-bold text-gray-900">{user.displayName || user.firstName || user.email || 'User'}</p>
-                  </div>
+                  {!isCollapsed && (
+                    <div className="ml-3 text-left truncate">
+                      <p className="text-sm font-bold text-gray-900 truncate">{user.displayName || user.firstName || user.email || 'User'}</p>
+                    </div>
+                  )}
                 </button>
                 {userMenuOpen && (
-                  <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-purple-100 py-2">
+                  <div className={`absolute bottom-full mb-2 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-purple-100 py-2 z-50 ${isCollapsed ? 'left-10 w-48' : 'left-0 right-0'}`}>
                     <Link
                       to="/profile"
                       className="flex items-center px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
@@ -364,7 +385,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         {/* Main Content */}
-        <div className="lg:ml-64 flex-1">
+        <div className={`transition-all duration-300 ease-in-out flex-1 ${isCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+          }`}>
           <main className="min-h-screen pt-20 lg:pt-8 px-4 lg:px-8 pb-8">
             {children}
           </main>

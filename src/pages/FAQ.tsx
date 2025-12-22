@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Search, MessageCircle, Mail, Phone, HelpCircle } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  Mail,
+  Phone,
+  HelpCircle
+} from 'lucide-react';
 
 const FAQ: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
 
   const toggleItem = (index: number) => {
-    setExpandedItems(prev => 
-      prev.includes(index) 
+    setExpandedItems(prev =>
+      prev.includes(index)
         ? prev.filter(i => i !== index)
         : [...prev, index]
     );
@@ -110,78 +116,83 @@ const FAQ: React.FC = () => {
   })).filter(category => category.questions.length > 0);
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-            <HelpCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+    <div className="min-h-screen bg-slate-50/50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center p-3 mb-6 bg-indigo-50 rounded-2xl ring-1 ring-indigo-100">
+            <HelpCircle className="w-8 h-8 text-indigo-600" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-3 sm:mb-4 px-4">
+          <h1 className="text-4xl font-bold text-slate-900 mb-4 tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
-            Find answers to common questions about Rretoriq's AI-powered practice platform.
+          <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto">
+            Find detailed answers to common questions about Rretoriq's AI-powered practice platform.
           </p>
-        </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6 sm:mb-8">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+          <div className="relative max-w-2xl mx-auto group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-200 to-purple-200 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-500" />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search for a question..."
+                className="block w-full pl-12 pr-4 py-4 bg-white border-0 rounded-xl text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 shadow-xl shadow-indigo-100/20 text-base"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            placeholder="Search questions..."
-            className="w-full pl-9 sm:pl-10 pr-4 py-2.5 sm:py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-gray-200 focus:border-transparent text-gray-900 text-sm sm:text-base"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </div>
 
         {/* FAQ Content */}
         {filteredFAQ.length === 0 ? (
-          <div className="text-center py-12">
-            <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No questions found</h3>
-            <p className="text-gray-600">Try a different search term or browse all categories below.</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 border-dashed">
+            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No results found</h3>
+            <p className="text-slate-500">
+              We couldn't find any questions matching "{searchTerm}".
+            </p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-10">
             {filteredFAQ.map((category, categoryIndex) => (
-              <div key={categoryIndex} className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+              <div key={categoryIndex}>
+                <h2 className="text-xl font-bold text-slate-900 mb-4 px-2 flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
                   {category.category}
                 </h2>
-                <div className="space-y-4">
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                   {category.questions.map((item, itemIndex) => {
                     const globalIndex = categoryIndex * 1000 + itemIndex;
                     const isExpanded = expandedItems.includes(globalIndex);
-                    
+                    const isLast = itemIndex === category.questions.length - 1;
+
                     return (
-                      <div
-                        key={itemIndex}
-                        className="border border-gray-200 rounded-lg overflow-hidden"
-                      >
+                      <div key={itemIndex} className={`group ${!isLast ? 'border-b border-slate-50' : ''}`}>
                         <button
                           onClick={() => toggleItem(globalIndex)}
-                          className="w-full px-4 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
+                          className="w-full px-6 py-5 text-left flex justify-between items-center transition-all duration-200 hover:bg-slate-50/50"
                         >
-                          <span className="font-medium text-gray-900 pr-4">
+                          <span className={`font-medium pr-8 transition-colors ${isExpanded ? 'text-indigo-600' : 'text-slate-700'}`}>
                             {item.question}
                           </span>
-                          {isExpanded ? (
-                            <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                          )}
+                          <div className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 ${isExpanded ? 'bg-indigo-50 text-indigo-600 rotate-180' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600'
+                            }`}>
+                            <ChevronDown className="w-5 h-5" />
+                          </div>
                         </button>
-                        {isExpanded && (
-                          <div className="px-4 pb-4 text-gray-600 leading-relaxed">
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                          <div className="px-6 pb-6 text-slate-600 leading-relaxed">
                             {item.answer}
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
@@ -192,28 +203,33 @@ const FAQ: React.FC = () => {
         )}
 
         {/* Contact Support */}
-        <div className="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-6 text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Still have questions?
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Our support team is here to help you succeed.
-          </p>
-          <div className="flex justify-center space-x-4">
-            <a
-              href="mailto:support@rretoriq.com"
-              className="inline-flex items-center px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Mail className="w-4 h-4 mr-2" />
-              Email Support
-            </a>
-            <a
-              href="tel:+919876543210"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Phone className="w-4 h-4 mr-2" />
-              Call Us
-            </a>
+        <div className="mt-20 bg-slate-900 rounded-3xl p-10 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+          <div className="relative z-10">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Still have questions?
+            </h3>
+            <p className="text-slate-400 mb-8 max-w-xl mx-auto">
+              Can't find the answer you're looking for? Please chat to our friendly team.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <a
+                href="mailto:support@rretoriq.com"
+                className="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-900 rounded-xl font-semibold hover:bg-slate-50 transition-colors gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                Email Support
+              </a>
+              <a
+                href="tel:+919876543210"
+                className="inline-flex items-center justify-center px-6 py-3 border border-slate-700 text-white rounded-xl font-semibold hover:bg-slate-800 transition-colors gap-2"
+              >
+                <Phone className="w-4 h-4" />
+                Contact Us
+              </a>
+            </div>
           </div>
         </div>
       </div>

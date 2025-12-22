@@ -1,5 +1,6 @@
 ﻿import { useEffect } from 'react'
 import { Routes, Route, Navigate } from "react-router-dom"
+import Feedback from './pages/Feedback'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { HelmetProvider } from 'react-helmet-async'
 import Layout from './components/Layout'
@@ -138,6 +139,11 @@ function App() {
                 <Progress />
               </ProtectedRoute>
             } />
+            <Route path="/feedback" element={
+              <ProtectedRoute>
+                <Feedback />
+              </ProtectedRoute>
+            } />
 
             {/* Pricing (public but enhanced for authenticated users) */}
             <Route path="/pricing" element={<Pricing />} />
@@ -153,6 +159,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/help" element={<Help />} />
             <Route path="/about" element={<AboutUs />} />
+
 
             {/* Coming Soon Pages (remaining) */}
             <Route path="/contact" element={

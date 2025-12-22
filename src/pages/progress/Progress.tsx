@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  LineChart, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
   Line,
   RadarChart,
   PolarGrid,
@@ -15,12 +15,12 @@ import {
   PolarRadiusAxis,
   Radar
 } from 'recharts'
-import { 
-  TrendingUp, 
-  Calendar, 
-  Clock, 
-  Award, 
-  Target, 
+import {
+  TrendingUp,
+  Calendar,
+  Clock,
+  Award,
+  Target,
   Filter,
   Download,
   Eye,
@@ -104,7 +104,7 @@ export default function Progress() {
         console.log('❌ No user found, skipping progress load')
         return
       }
-      
+
       console.log('📊 Loading progress data for user:', user.id)
       setLoading(true)
       setError(null)
@@ -118,9 +118,9 @@ export default function Progress() {
           progressService.getMonthlyStats(user.id),
           progressService.getRadarData(user.id)
         ])
-        
+
         console.log('✅ Progress data loaded:', { statsData, sessionsData, weeklyData, skillsData, monthlyData, radarData })
-        
+
         setStats(statsData)
         setRecentSessions(sessionsData)
         setWeeklyProgress(weeklyData)
@@ -143,24 +143,53 @@ export default function Progress() {
     return isIELTS ? score.toFixed(1) : Math.round(score)
   }
 
+  const handleExport = () => {
+    if (recentSessions.length === 0) {
+      // You might want to show a toast or alert here
+      return
+    }
+
+    const headers = ['Date', 'Type', 'Score', 'Duration', 'Improvement']
+    const csvContent = [
+      headers.join(','),
+      ...recentSessions.map(session => [
+        new Date(session.date).toLocaleDateString(),
+        `"${session.type}"`,
+        formatScore(session.score, session.type.includes('IELTS')),
+        `"${session.duration}"`,
+        `"${session.improvement}"`
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `progress_report_${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-3" />
           <span className="text-gray-700 font-medium">Loading progress data...</span>
-            <div className="mt-4 text-left text-xs text-gray-500 bg-gray-100 rounded p-2">
-              <div><strong>Debug Info:</strong></div>
-              <div>User: {JSON.stringify(user)}</div>
-              <div>Loading: {JSON.stringify(loading)}</div>
-              <div>Error: {JSON.stringify(error)}</div>
-              <div>Stats: {JSON.stringify(stats)}</div>
-              <div>RecentSessions: {JSON.stringify(recentSessions)}</div>
-              <div>WeeklyProgress: {JSON.stringify(weeklyProgress)}</div>
-              <div>SkillBreakdown: {JSON.stringify(skillBreakdown)}</div>
-              <div>MonthlyStats: {JSON.stringify(monthlyStats)}</div>
-              <div>PerformanceRadar: {JSON.stringify(performanceRadar)}</div>
-            </div>
+          <div className="mt-4 text-left text-xs text-gray-500 bg-gray-100 rounded p-2">
+            <div><strong>Debug Info:</strong></div>
+            <div>User: {JSON.stringify(user)}</div>
+            <div>Loading: {JSON.stringify(loading)}</div>
+            <div>Error: {JSON.stringify(error)}</div>
+            <div>Stats: {JSON.stringify(stats)}</div>
+            <div>RecentSessions: {JSON.stringify(recentSessions)}</div>
+            <div>WeeklyProgress: {JSON.stringify(weeklyProgress)}</div>
+            <div>SkillBreakdown: {JSON.stringify(skillBreakdown)}</div>
+            <div>MonthlyStats: {JSON.stringify(monthlyStats)}</div>
+            <div>PerformanceRadar: {JSON.stringify(performanceRadar)}</div>
+          </div>
         </div>
       </div>
     )
@@ -179,18 +208,18 @@ export default function Progress() {
             >
               Reload Page
             </button>
-              <div className="mt-4 text-left text-xs text-gray-500 bg-gray-100 rounded p-2">
-                <div><strong>Debug Info:</strong></div>
-                <div>User: {JSON.stringify(user)}</div>
-                <div>Loading: {JSON.stringify(loading)}</div>
-                <div>Error: {JSON.stringify(error)}</div>
-                <div>Stats: {JSON.stringify(stats)}</div>
-                <div>RecentSessions: {JSON.stringify(recentSessions)}</div>
-                <div>WeeklyProgress: {JSON.stringify(weeklyProgress)}</div>
-                <div>SkillBreakdown: {JSON.stringify(skillBreakdown)}</div>
-                <div>MonthlyStats: {JSON.stringify(monthlyStats)}</div>
-                <div>PerformanceRadar: {JSON.stringify(performanceRadar)}</div>
-              </div>
+            <div className="mt-4 text-left text-xs text-gray-500 bg-gray-100 rounded p-2">
+              <div><strong>Debug Info:</strong></div>
+              <div>User: {JSON.stringify(user)}</div>
+              <div>Loading: {JSON.stringify(loading)}</div>
+              <div>Error: {JSON.stringify(error)}</div>
+              <div>Stats: {JSON.stringify(stats)}</div>
+              <div>RecentSessions: {JSON.stringify(recentSessions)}</div>
+              <div>WeeklyProgress: {JSON.stringify(weeklyProgress)}</div>
+              <div>SkillBreakdown: {JSON.stringify(skillBreakdown)}</div>
+              <div>MonthlyStats: {JSON.stringify(monthlyStats)}</div>
+              <div>PerformanceRadar: {JSON.stringify(performanceRadar)}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -206,11 +235,19 @@ export default function Progress() {
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3">Progress Analytics</h1>
             <p className="text-gray-700 text-sm sm:text-base font-medium">Track your communication skills improvement over time</p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 mt-4 lg:mt-0">
-            <select 
+            <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={(e) => {
+                const range = e.target.value
+                setTimeRange(range)
+                if (range === 'week') {
+                  setViewType('overview')
+                } else {
+                  setViewType('detailed')
+                }
+              }}
               className="px-3 sm:px-4 py-2 border border-purple-200 rounded-lg focus:ring-2 focus:ring-purple-300 focus:border-purple-300 text-xs sm:text-sm font-medium bg-white/80 backdrop-blur-sm"
             >
               <option value="week">Last 7 Days</option>
@@ -218,33 +255,41 @@ export default function Progress() {
               <option value="quarter">Last 3 Months</option>
               <option value="year">Last Year</option>
             </select>
-            
+
             <div className="flex gap-1">
               <button
-                onClick={() => setViewType('overview')}
-                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                  viewType === 'overview' 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' 
-                    : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
-                }`}
+                onClick={() => {
+                  setViewType('overview')
+                  setTimeRange('week')
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewType === 'overview'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
+                  }`}
               >
                 <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Overview</span>
               </button>
               <button
-                onClick={() => setViewType('detailed')}
-                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                  viewType === 'detailed' 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' 
-                    : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
-                }`}
+                onClick={() => {
+                  setViewType('detailed')
+                  if (timeRange === 'week') setTimeRange('month')
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all ${viewType === 'detailed'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  : 'border border-purple-200 text-gray-700 hover:bg-purple-50 bg-white/80 backdrop-blur-sm'
+                  }`}
               >
                 <PieChartIcon className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Detailed</span>
               </button>
             </div>
-            
-            <button className="border border-purple-200 text-indigo-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm font-medium bg-white/80 backdrop-blur-sm shadow-sm">
+
+            <button
+              onClick={handleExport}
+              disabled={recentSessions.length === 0}
+              className={`border border-purple-200 text-indigo-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm font-medium bg-white/80 backdrop-blur-sm shadow-sm ${recentSessions.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               <Download className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Export</span>
             </button>
@@ -332,19 +377,19 @@ export default function Progress() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={weeklyProgress}>
                       <CartesianGrid strokeDasharray="1 1" stroke="#f3f4f6" />
-                      <XAxis 
-                        dataKey="date" 
+                      <XAxis
+                        dataKey="date"
                         tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                       />
-                      <YAxis 
+                      <YAxis
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                       />
-                      <Tooltip 
+                      <Tooltip
                         labelFormatter={(value) => new Date(value).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                         formatter={(value, name) => [
                           name === 'ielts' ? `${value}/9.0` : `${value}%`,
@@ -380,13 +425,13 @@ export default function Progress() {
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={performanceRadar}>
                       <PolarGrid stroke="#e5e7eb" strokeWidth={1} />
-                      <PolarAngleAxis 
-                        dataKey="skill" 
+                      <PolarAngleAxis
+                        dataKey="skill"
                         tick={{ fontSize: 13, fill: '#374151', fontWeight: 500 }}
                       />
-                      <PolarRadiusAxis 
-                        angle={90} 
-                        domain={[0, 100]} 
+                      <PolarRadiusAxis
+                        angle={90}
+                        domain={[0, 100]}
                         tick={{ fontSize: 11, fill: '#9ca3af' }}
                         stroke="#e5e7eb"
                       />
@@ -430,13 +475,13 @@ export default function Progress() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={monthlyStats}>
                       <CartesianGrid strokeDasharray="1 1" stroke="#f3f4f6" />
-                      <XAxis 
+                      <XAxis
                         dataKey="month"
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                       />
-                      <YAxis 
+                      <YAxis
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 12, fill: '#6b7280' }}
@@ -476,7 +521,7 @@ export default function Progress() {
                         <span className="text-sm font-medium text-gray-500">{skill.current.toFixed(1)}/9.0</span>
                       </div>
                       <div className="w-full bg-gray-100 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-gray-700 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${Math.max(5, (skill.current / 9.0) * 100)}%` }}
                         />
@@ -513,7 +558,7 @@ export default function Progress() {
               </select>
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -539,8 +584,8 @@ export default function Progress() {
                         </div>
                       </td>
                       <td className="py-4 px-0 text-sm text-gray-600">
-                        {new Date(session.date).toLocaleDateString('en-US', { 
-                          month: 'short', 
+                        {new Date(session.date).toLocaleDateString('en-US', {
+                          month: 'short',
                           day: 'numeric'
                         })}
                       </td>

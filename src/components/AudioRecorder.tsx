@@ -6,15 +6,16 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react'
-import { 
-  Mic, 
-  Square, 
-  Play, 
-  Pause, 
-  RotateCcw, 
+import {
+  Mic,
+  Square,
+  Play,
+  Pause,
+  RotateCcw,
   Upload,
   Volume2,
-  VolumeX,
+  AlertCircle,
+
   Loader2,
   CheckCircle,
   XCircle,
@@ -52,14 +53,15 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const [duration, setDuration] = useState(0)
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [audioURL, setAudioURL] = useState<string | null>(null)
-  
+
   // Analysis state
   const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  
+  const [error, setError] = useState<string | null>(null)
+
   // Audio visualization
-  const [audioLevel, setAudioLevel] = useState(0)
-  
+
+
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -67,6 +69,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const analyserRef = useRef<AnalyserNode | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const animationRef = useRef<number | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   // Cleanup on unmount
   useEffect(() => {
@@ -104,9 +107,10 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       analyserRef.current = audioContextRef.current.createAnalyser()
       const source = audioContextRef.current.createMediaStreamSource(stream)
       source.connect(analyserRef.current)
-      
-      analyserRef.current.fftSize = 256
-      startAudioVisualization()
+
+      analyserRef.current.fftSize = 2048
+
+      // Start visualization loop handled by useEffect
 
       return stream
     } catch (error) {
@@ -115,25 +119,105 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     }
   }
 
-  /**
-   * Start audio level visualization
-   */
-  const startAudioVisualization = () => {
-    if (!analyserRef.current) return
 
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
-    
-    const updateAudioLevel = () => {
-      if (analyserRef.current && recordingState === 'recording') {
-        analyserRef.current.getByteFrequencyData(dataArray)
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length
-        setAudioLevel(Math.min(average / 128, 1))
-        animationRef.current = requestAnimationFrame(updateAudioLevel)
+  /**
+   * Handle audio visualization with Canvas
+   */
+  useEffect(() => {
+    if (recordingState === 'recording' && analyserRef.current && canvasRef.current) {
+      setError(null) // Clear error when recording starts
+      const canvas = canvasRef.current
+      const canvasCtx = canvas.getContext('2d')
+      const analyser = analyserRef.current
+
+      if (!canvasCtx) return
+
+      // Configuration for the bars
+      const BAR_WIDTH = 4
+      const BAR_GAP = 2
+      const TOTAL_BAR_WIDTH = BAR_WIDTH + BAR_GAP
+      const MAX_BARS = Math.ceil(canvas.width / TOTAL_BAR_WIDTH)
+
+      // Use a ref to store the amplitude history so it persists across renders
+      // We attach it to the canvas element for convenience or use a mutable variable
+      // Since we are inside useEffect, a local mutable array is fine IF we didn't need it to persist 
+      // between different effect calls. But recordingState changes trigger re-run.
+      // We want to reset when recording starts anyway.
+      const amplitudeHistory: number[] = new Array(MAX_BARS).fill(0)
+
+      const bufferLength = analyser.frequencyBinCount
+      const dataArray = new Uint8Array(bufferLength)
+
+      const draw = () => {
+        animationRef.current = requestAnimationFrame(draw)
+
+        // Get fresh time domain data (waveform)
+        analyser.getByteTimeDomainData(dataArray)
+
+        // Calculate RMS (Root Mean Square) volume for this frame
+        let sumSquares = 0
+        for (let i = 0; i < bufferLength; i++) {
+          const normalized = (dataArray[i] - 128) / 128
+          sumSquares += normalized * normalized
+        }
+        const rms = Math.sqrt(sumSquares / bufferLength)
+
+        // Boost the signal a bit to make it look good
+        const amplifiedVolume = Math.min(rms * 4, 1) // Cap at 1.0
+
+        // Add new value to history
+        amplitudeHistory.push(amplifiedVolume)
+
+        // Remove old values to keep the flowing effect
+        if (amplitudeHistory.length > MAX_BARS) {
+          amplitudeHistory.shift()
+        }
+
+        // DRAWING
+        canvasCtx.fillStyle = '#FAFAFA' // Match the bg color or clear
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // Create gradient
+        const gradient = canvasCtx.createLinearGradient(0, 0, 0, canvas.height)
+        gradient.addColorStop(0, '#6366f1') // Indigo 500
+        gradient.addColorStop(0.5, '#ec4899') // Pink 500
+        gradient.addColorStop(1, '#6366f1') // Indigo 500
+
+        canvasCtx.fillStyle = gradient
+
+        // Draw bars
+        // We draw from right to left so the newest is on the right
+        // actually standard array order: index 0 is left (oldest), index len is right (newest)
+        // This creates a "scrolling left" effect
+        amplitudeHistory.forEach((amp, index) => {
+          // Calculate bar height based on amplitude
+          // Min height 2px so it's always visible
+          const h = Math.max(canvas.height * amp * 0.9, 4)
+
+          // Center vertically
+          const y = (canvas.height - h) / 2
+          const x = index * TOTAL_BAR_WIDTH
+
+          // Draw rounded bar
+          canvasCtx.beginPath()
+          canvasCtx.roundRect(x, y, BAR_WIDTH, h, 4)
+          canvasCtx.fill()
+        })
+      }
+
+      draw()
+    } else {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
       }
     }
 
-    updateAudioLevel()
-  }
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [recordingState])
 
   /**
    * Start recording audio
@@ -155,7 +239,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           mimeType = '' // Let browser choose
         }
       }
-      
+
       console.log('🎙️ Using MIME type:', mimeType)
 
       const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
@@ -176,28 +260,28 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         setAudioBlob(blob)
         setAudioURL(URL.createObjectURL(blob))
         setRecordingState('stopped')
-        
+
         // Clean up stream
         stream.getTracks().forEach(track => track.stop())
       }
 
       mediaRecorder.start()
       mediaRecorderRef.current = mediaRecorder
-      
+
       setRecordingState('recording')
       setDuration(0)
-      
+
       // Start timer
       timerRef.current = setInterval(() => {
         setDuration(prev => {
           const newDuration = prev + 1
-          
+
           // Auto-stop if max duration reached
           if (autoStop && newDuration >= maxDuration) {
             stopRecording()
             return maxDuration
           }
-          
+
           return newDuration
         })
       }, 1000)
@@ -221,7 +305,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     } else if (recordingState === 'paused') {
       mediaRecorderRef.current.resume()
       setRecordingState('recording')
-      
+
       // Resume timer
       timerRef.current = setInterval(() => {
         setDuration(prev => {
@@ -243,7 +327,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
     }
-    
+
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
@@ -254,7 +338,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       animationRef.current = null
     }
 
-    setAudioLevel(0)
+
   }
 
   /**
@@ -262,18 +346,19 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
    */
   const resetRecording = () => {
     stopRecording()
-    
+
     if (audioURL) {
       URL.revokeObjectURL(audioURL)
     }
-    
+
     setRecordingState('idle')
     setDuration(0)
     setAudioBlob(null)
     setAudioURL(null)
     setTranscriptionResult(null)
     setIsAnalyzing(false)
-    setAudioLevel(0)
+    setError(null)
+
   }
 
   /**
@@ -299,7 +384,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       console.log('🎤 Starting transcription...')
       const transcription = await speechToTextService.transcribeAudio(audioBlob)
       console.log('📝 Transcription result:', transcription)
-      
+
       setTranscriptionResult(transcription)
       onTranscriptionComplete?.(transcription)
 
@@ -326,32 +411,24 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
     } catch (error) {
       console.error('❌ Audio processing failed:', error)
       setRecordingState('stopped')
-      
-      // Determine error type and provide specific feedback
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      const isApiRestrictionError = errorMessage.includes('403') || errorMessage.includes('access denied')
-      
-      // Show error feedback
-      const errorAnalysis: AnswerAnalysis = {
-        overallScore: 0,
-        transcript: transcriptionResult?.transcript || '',
-        feedback: {
-          strengths: [],
-          weaknesses: ['Processing failed'],
-          suggestions: isApiRestrictionError 
-            ? ['Please configure API key restrictions in Google Cloud Console to allow localhost'] 
-            : ['Please try recording again'],
-          detailedFeedback: isApiRestrictionError 
-            ? 'Speech-to-text failed due to API restrictions. Please add localhost to your Google Cloud API key restrictions.'
-            : 'We encountered an issue processing your response. Please try again.'
-        },
-        scores: { clarity: 0, relevance: 0, structure: 0, completeness: 0, confidence: 0 },
-        keyPoints: { covered: [], missed: [] },
-        timeManagement: { duration, efficiency: 'poor', pacing: 'Unable to analyze' },
-        processingTime: 0
+
+      // Determine user-friendly error message
+      let displayError = 'We encountered an issue processing your response. Please try again.'
+
+      if (errorMessage.includes('403') || errorMessage.includes('access denied')) {
+        displayError = 'API Key Error: Please check your configuration.'
+      } else if (errorMessage.includes('Network Error') || errorMessage.includes('Failed to fetch')) {
+        displayError = 'Network Connection Error. Please check your internet.'
+      } else if (errorMessage.includes('too large')) {
+        displayError = 'Recording is too long. Please try a shorter answer.'
+      } else if (errorMessage.includes('No speech detected')) {
+        displayError = 'No speech detected. Please check your microphone.'
       }
-      
-      onAnalysisComplete?.(errorAnalysis)
+
+      setError(displayError)
+      // Do NOT call onAnalysisComplete with fallback data, so user stays here to retry
     } finally {
       setIsAnalyzing(false)
     }
@@ -392,21 +469,30 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         </div>
       </div>
 
-      {/* Audio Level Visualization */}
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-sm font-medium text-red-800">Recording Analysis Failed</h4>
+            <p className="text-sm text-red-700 mt-1">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Audio Waveform Visualization */}
       {recordingState === 'recording' && (
         <div className="mb-6">
           <div className="flex items-center space-x-2 mb-2">
-            {audioLevel > 0.1 ? (
-              <Volume2 className="w-4 h-4 text-green-600" />
-            ) : (
-              <VolumeX className="w-4 h-4 text-gray-400" />
-            )}
-            <span className="text-sm text-gray-600">Audio Level</span>
+            <Volume2 className="w-4 h-4 text-indigo-600 animate-pulse" />
+            <span className="text-sm font-medium text-gray-700">Recording...</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-500 h-2 rounded-full transition-all duration-100"
-              style={{ width: `${audioLevel * 100}%` }}
+          <div className="w-full h-24 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden relative">
+            <canvas
+              ref={canvasRef}
+              width={600}
+              height={100}
+              className="w-full h-full"
             />
           </div>
         </div>
@@ -436,7 +522,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
                 <Play className="w-5 h-5" />
               )}
             </button>
-            
+
             <button
               onClick={stopRecording}
               className="flex items-center space-x-2 bg-gray-800 text-white px-4 py-3 rounded-lg hover:bg-gray-900 transition-colors"
@@ -461,7 +547,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
               )}
               <span>{isAnalyzing ? 'Processing...' : 'Analyze Answer'}</span>
             </button>
-            
+
             <button
               onClick={resetRecording}
               className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors"
@@ -522,7 +608,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
               <span>Words: {transcriptionResult.transcript.split(' ').length}</span>
             </div>
           </div>
-          
+
           <div className="border border-gray-200 rounded-lg p-4 bg-white">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
@@ -540,8 +626,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
                       </p>
                     </div>
                     <p className="text-xs text-gray-500 mt-2 italic">
-                      {recordingState === 'completed' 
-                        ? '✅ This transcription has been analyzed. It will remain visible until you proceed to the next question.' 
+                      {recordingState === 'completed'
+                        ? '✅ This transcription has been analyzed. It will remain visible until you proceed to the next question.'
                         : 'This transcription will be sent to AI for analysis. It cannot be edited.'}
                     </p>
                   </>
@@ -559,8 +645,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
       {/* Progress Information */}
       <div className="text-xs text-gray-500 text-center">
-        Maximum recording duration: {formatDuration(maxDuration)} • 
-        Question type: {question.type} • 
+        Maximum recording duration: {formatDuration(maxDuration)} •
+        Question type: {question.type} •
         Expected duration: {formatDuration(Math.min(question.expectedDuration, maxDuration))}
       </div>
     </div>
