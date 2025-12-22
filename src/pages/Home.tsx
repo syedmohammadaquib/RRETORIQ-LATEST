@@ -4,6 +4,7 @@ import SEO from '../components/SEO'
 import WordPhraseCard from '../components/WordPhraseCard'
 import TrustStrip from '../components/TrustStrip'
 import SolutionFeatures from '../components/SolutionFeatures'
+import BeforeAfter from '../components/BeforeAfter'
 import {
   ArrowRight,
   Target,
@@ -128,6 +129,9 @@ export default function Home() {
 
         {/* Solution Features Section */}
         <SolutionFeatures />
+
+        {/* Before vs After Section */}
+        <BeforeAfter />
 
         {/* Features Grid */}
         <section className="py-28 bg-gray-50/50">
