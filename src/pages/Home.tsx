@@ -5,6 +5,7 @@ import WordPhraseCard from '../components/WordPhraseCard'
 import TrustStrip from '../components/TrustStrip'
 import SolutionFeatures from '../components/SolutionFeatures'
 import BeforeAfter from '../components/BeforeAfter'
+import FinalCTA from '../components/FinalCTA'
 import {
   ArrowRight,
   Target,
@@ -251,34 +252,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-28 bg-gradient-to-r from-indigo-600 to-purple-600">
-          <div ref={ctaRef} className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-4xl lg:text-5xl font-light text-white mb-8 leading-tight">
-              Ready to transform your{' '}
-              <span className="font-medium">communication skills?</span>
-            </h2>
-
-            <p className="text-lg text-indigo-100 mb-14 max-w-2xl mx-auto font-light leading-relaxed">
-              Join thousands of professionals who have accelerated their careers with Bridging communication with Intelligence. Start your journey today.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-5 justify-center">
-              <Link
-                to="/register"
-                className="bg-white hover:bg-gray-50 text-indigo-600 px-10 py-4 rounded-full font-medium text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
-              >
-                Get Started Today
-              </Link>
-              <Link
-                to="/pricing"
-                className="border-2 border-white/40 hover:border-white/60 text-white hover:bg-white/10 px-10 py-4 rounded-full font-medium text-lg transition-all duration-300 hover:shadow-xl backdrop-blur-sm"
-              >
-                View Pricing
-              </Link>
-            </div>
-          </div>
-        </section>
+        {/* Final CTA Section */}
+        <FinalCTA />
       </div>
     </>
   )
