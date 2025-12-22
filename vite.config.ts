@@ -8,6 +8,12 @@ export default defineConfig({
   define: {
     global: 'globalThis',
   },
+  server: {
+    headers: {
+      // Prevent Firebase Auth popup warnings due to COOP restrictions
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

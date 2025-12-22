@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, initializeFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 // Firebase configuration
@@ -18,7 +18,13 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firebase services
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Use long-polling in dev/proxyed networks to avoid "client is offline"
+export const db = typeof window !== 'undefined'
+  ? initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+    useFetchStreams: false,
+  })
+  : getFirestore(app)
 export const storage = getStorage(app)
 
 // Configure Google Auth Provider
