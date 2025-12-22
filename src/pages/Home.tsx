@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SEO from '../components/SEO'
 import WordPhraseCard from '../components/WordPhraseCard'
 import TrustStrip from '../components/TrustStrip'
+import SolutionFeatures from '../components/SolutionFeatures'
 import {
   ArrowRight,
   Target,
@@ -60,7 +61,6 @@ export default function Home() {
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
     }
   ]
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
@@ -125,6 +125,9 @@ export default function Home() {
 
         {/* Trust Strip */}
         <TrustStrip variant="light" />
+
+        {/* Solution Features Section */}
+        <SolutionFeatures />
 
         {/* Features Grid */}
         <section className="py-28 bg-gray-50/50">
