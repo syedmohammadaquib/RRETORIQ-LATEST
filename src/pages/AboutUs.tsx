@@ -1,12 +1,12 @@
 import React from 'react';
-import { 
-  Brain, 
-  Target, 
-  Users, 
-  Award, 
-  Zap, 
-  Globe, 
-  Shield, 
+import {
+  Brain,
+  Target,
+  Users,
+  Award,
+  Zap,
+  Globe,
+  Shield,
   Heart,
   CheckCircle,
   Star,
@@ -87,17 +87,21 @@ const AboutUs: React.FC = () => {
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-black rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
-            <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+          <div className="flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <img
+              src="/resources/Rretoriq_main_blk.png"
+              alt="Rretoriq Logo"
+              className="h-12 sm:h-16 w-auto"
+            />
           </div>
           <h1 className="text-2xl sm:text-3xl font-medium text-gray-900 mb-3 sm:mb-4 px-4">
             About Rretoriq
           </h1>
           <p className="text-sm sm:text-base text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-            Empowering individuals and organizations with AI-driven communication training 
+            Empowering individuals and organizations with AI-driven communication training
             that transforms practice into performance.
           </p>
         </div>
@@ -107,7 +111,7 @@ const AboutUs: React.FC = () => {
           <div className="text-center mb-8">
             <h2 className="text-2xl font-medium text-gray-900 mb-4">Our Mission</h2>
             <p className="text-gray-600 text-lg max-w-4xl mx-auto leading-relaxed">
-              To democratize access to world-class communication training through innovative AI technology, 
+              To democratize access to world-class communication training through innovative AI technology,
               helping millions of people achieve their academic, professional, and personal communication goals.
             </p>
           </div>
@@ -158,13 +162,13 @@ const AboutUs: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="space-y-4">
               <p className="text-gray-600 leading-relaxed">
-                Founded in 2023, Rretoriq was born from the vision of making premium communication 
-                training accessible to everyone. Our founders, experienced educators and technologists, 
+                Founded in 2023, Rretoriq was born from the vision of making premium communication
+                training accessible to everyone. Our founders, experienced educators and technologists,
                 recognized the gap between traditional coaching methods and the needs of modern learners.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                By combining cutting-edge AI technology with pedagogical expertise, we've created 
-                a platform that provides instant, personalized feedback - something previously 
+                By combining cutting-edge AI technology with pedagogical expertise, we've created
+                a platform that provides instant, personalized feedback - something previously
                 only available through expensive one-on-one coaching.
               </p>
               <div className="flex items-center space-x-2">
