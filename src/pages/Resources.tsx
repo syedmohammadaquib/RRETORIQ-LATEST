@@ -417,10 +417,10 @@ export default function Resources() {
                         className="w-full text-left"
                       >
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl font-bold text-gray-900">{framework.id}</span>
-                          <div className={`h-1 flex-1 max-w-[180px] rounded-full bg-gradient-to-r ${framework.accent}`}></div>
+                          <span className="text-2xl font-bold text-gray-900 flex-shrink-0">{framework.id}</span>
+                          <div className={`h-1.5 flex-1 rounded-full bg-gradient-to-r ${framework.accent}`}></div>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900">{framework.title}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 ml-0">{framework.title}</h3>
                         <p className="text-sm font-semibold text-gray-700">{framework.subtitle}</p>
                         <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all">
                           View more
