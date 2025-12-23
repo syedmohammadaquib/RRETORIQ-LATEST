@@ -422,7 +422,9 @@ export default function Resources() {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900">{framework.title}</h3>
                         <p className="text-sm font-semibold text-gray-700">{framework.subtitle}</p>
-                        <p className="text-xs uppercase tracking-wide text-indigo-600 font-bold mt-2">{framework.stepsLabel}</p>
+                        <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all">
+                          View more
+                        </div>
                       </button>
 
                       {isOpen && (
