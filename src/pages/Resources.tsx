@@ -10,6 +10,17 @@ interface Resource {
   category: string
 }
 
+interface SampleFramework {
+  id: number
+  title: string
+  subtitle: string
+  stepsLabel: string
+  summary: string
+  detail: string
+  accent: string
+  detailLines?: { label: string; text: string }[]
+}
+
 const resources: Resource[] = [
   {
     id: 1,
@@ -132,14 +143,106 @@ const resources: Resource[] = [
   }
 ]
 
+const sampleFrameworks: SampleFramework[] = [
+  {
+    id: 1,
+    title: 'STAR',
+    subtitle: 'Situation, Task, Action, Result',
+    stepsLabel: '4 steps',
+    summary: 'Past-experience structure that spotlights your impact with clear results.',
+    detail: 'Situation: set the scene with who, what, and when. Task: spell out the objective or expectation. Action: list the key steps you personally took. Result: quantify the outcome and note one lesson learned.',
+    accent: 'from-emerald-500 to-green-500',
+    detailLines: [
+      { label: 'Situation', text: 'set the scene with who, what, and when.' },
+      { label: 'Task', text: 'spell out the objective or expectation.' },
+      { label: 'Action', text: 'list the key steps you personally took.' },
+      { label: 'Result', text: 'quantify the outcome and note one lesson learned.' }
+    ]
+  },
+  {
+    id: 2,
+    title: 'SOAR',
+    subtitle: 'Situation, Obstacle, Action, Result',
+    stepsLabel: '4 steps',
+    summary: 'Great for adversity stories—what blocked you and how you overcame it.',
+    detail: 'Situation: give the context and why it mattered. Obstacle: name the blocker, risk, or constraint. Action: show how you removed or reduced that obstacle. Result: share the measurable finish and the confidence gain.',
+    accent: 'from-blue-500 to-sky-500',
+    detailLines: [
+      { label: 'Situation', text: 'give the context and why it mattered.' },
+      { label: 'Obstacle', text: 'name the blocker, risk, or constraint.' },
+      { label: 'Action', text: 'show how you removed or reduced that obstacle.' },
+      { label: 'Result', text: 'share the measurable finish and the confidence gain.' }
+    ]
+  },
+  {
+    id: 3,
+    title: 'PREP',
+    subtitle: 'Point, Reason, Example, Point',
+    stepsLabel: '4 steps',
+    summary: 'Crisp, persuasive answers for opinion or hypothetical questions.',
+    detail: 'Point: open with a crisp position. Reason: explain the logic or evidence behind it. Example: use a short story or data point to make it real. Point: close by restating the position with confidence.',
+    accent: 'from-amber-500 to-orange-500',
+    detailLines: [
+      { label: 'Point', text: 'open with a crisp position.' },
+      { label: 'Reason', text: 'explain the logic or evidence behind it.' },
+      { label: 'Example', text: 'use a short story or data point to make it real.' },
+      { label: 'Point', text: 'close by restating the position with confidence.' }
+    ]
+  },
+  {
+    id: 4,
+    title: 'WHW',
+    subtitle: 'Why, How, What',
+    stepsLabel: '3 steps',
+    summary: 'Explains motivation first, then approach, then tangible actions.',
+    detail: 'Why: start with the intent or goal that guided you. How: outline the plan, process, or guardrails you chose. What: describe the concrete actions, artifacts, or deliverables that came out of it.',
+    accent: 'from-rose-500 to-pink-500',
+    detailLines: [
+      { label: 'Why', text: 'start with the intent or goal that guided you.' },
+      { label: 'How', text: 'outline the plan, process, or guardrails you chose.' },
+      { label: 'What', text: 'describe the concrete actions, artifacts, or deliverables that came out of it.' }
+    ]
+  },
+  {
+    id: 5,
+    title: 'CAR',
+    subtitle: 'Context, Action, Result',
+    stepsLabel: '3 steps',
+    summary: 'Lean format when time is short but you still need proof of impact.',
+    detail: 'Context: the situation in one tight line. Action: the top one or two moves you made, prioritized. Result: the outcome with a metric, plus what changed for the team or user.',
+    accent: 'from-indigo-500 to-violet-500',
+    detailLines: [
+      { label: 'Context', text: 'the situation in one tight line.' },
+      { label: 'Action', text: 'the top one or two moves you made, prioritized.' },
+      { label: 'Result', text: 'the outcome with a metric, plus what changed for the team or user.' }
+    ]
+  },
+  {
+    id: 6,
+    title: 'A3',
+    subtitle: 'Action, Analysis, Adjustment',
+    stepsLabel: '3 steps',
+    summary: 'Highlights learning loops--great for experiments and iterations.',
+    detail: 'Action: describe what you tried first. Analysis: share what you observed and how you measured it. Adjustment: explain the changes you made based on the signal and what you would try next.',
+    accent: 'from-purple-500 to-fuchsia-500',
+    detailLines: [
+      { label: 'Action', text: 'describe what you tried first.' },
+      { label: 'Analysis', text: 'share what you observed and how you measured it.' },
+      { label: 'Adjustment', text: 'explain the changes you made based on the signal and what you would try next.' }
+    ]
+  }
+]
+
 const categories = Array.from(new Set(resources.map(r => r.category)))
 
 export default function Resources() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
+  const [activeCard, setActiveCard] = useState<'resources' | 'sample'>('resources')
+  const [selectedFramework, setSelectedFramework] = useState<number | null>(null)
 
-  const filteredResources = selectedCategory === 'All' 
-    ? resources 
+  const filteredResources = selectedCategory === 'All'
+    ? resources
     : resources.filter(r => r.category === selectedCategory)
 
   const getCategoryColor = (category: string) => {
@@ -156,7 +259,7 @@ export default function Resources() {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="The Rretoriq Guide - Learning Materials | Rretoriq"
         description="Access our comprehensive collection of communication, interview, and public speaking resources. Download guides, tips, and strategies to enhance your skills."
         keywords="communication resources, interview guides, public speaking materials, learning resources, professional development"
@@ -179,89 +282,167 @@ export default function Resources() {
             </p>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {/* Card Switcher */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <button
-              onClick={() => setSelectedCategory('All')}
-              className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 ${
-                selectedCategory === 'All'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
-                  : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md'
-              }`}
+              onClick={() => setActiveCard('resources')}
+              className={`w-full rounded-2xl border-2 bg-white/80 backdrop-blur-sm p-6 text-left shadow-md transition-all duration-200 hover:shadow-lg ${activeCard === 'resources'
+                ? 'border-indigo-500 shadow-indigo-100'
+                : 'border-transparent hover:border-indigo-200'
+                }`}
             >
-              All Resources
+              <div className="flex items-center gap-3 mb-2">
+                <BookOpen className="w-6 h-6 text-indigo-600" />
+                <h2 className="text-xl font-bold text-gray-900">Resources</h2>
+              </div>
+              <p className="text-sm text-gray-600">Tap to view all guides, filters, and downloads exactly as below.</p>
             </button>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 ${
-                  selectedCategory === category
+
+            <button
+              onClick={() => setActiveCard('sample')}
+              className={`w-full rounded-2xl border-2 bg-white/80 backdrop-blur-sm p-6 text-left shadow-md transition-all duration-200 hover:shadow-lg ${activeCard === 'sample'
+                ? 'border-indigo-500 shadow-indigo-100'
+                : 'border-transparent hover:border-indigo-200'
+                }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <FileText className="w-6 h-6 text-indigo-600" />
+                <h2 className="text-xl font-bold text-gray-900">Sample Answer</h2>
+              </div>
+              <p className="text-sm text-gray-600">Tap to view answer frameworks and quick breakdowns.</p>
+            </button>
+          </div>
+
+          {activeCard === 'resources' && (
+            <>
+              {/* Category Filter */}
+              <div className="flex flex-wrap justify-center gap-3 mb-8">
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 ${selectedCategory === 'All'
                     ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                     : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          {/* Resources Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResources.map(resource => (
-              <div
-                key={resource.id}
-                className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
-              >
-                {/* PDF Preview */}
-                <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(resource.category)} opacity-20`}></div>
-                  <iframe
-                    src={`/resources/${encodeURIComponent(resource.filename)}#toolbar=0&navpanes=0&scrollbar=0`}
-                    className="w-full h-full pointer-events-none"
-                    title={resource.title}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
-                    <button
-                      onClick={() => setSelectedResource(resource)}
-                      className="bg-white text-gray-900 px-6 py-2.5 rounded-xl font-bold shadow-lg hover:bg-gray-100 transition-colors"
-                    >
-                      View Full PDF
-                    </button>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-6">
-                  <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${getCategoryColor(resource.category)} mb-3`}>
-                    {resource.category}
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                    {resource.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {resource.description}
-                  </p>
-                  
+                    }`}
+                >
+                  All Resources
+                </button>
+                {categories.map(category => (
                   <button
-                    onClick={() => setSelectedResource(resource)}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 ${selectedCategory === category
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                      : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-md'
+                      }`}
                   >
-                    <FileText className="w-4 h-4" />
-                    <span>View</span>
+                    {category}
                   </button>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* No Results */}
-          {filteredResources.length === 0 && (
-            <div className="text-center py-16">
-              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No resources found</h3>
-              <p className="text-gray-600">Try selecting a different category</p>
-            </div>
+              {/* Resources Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredResources.map(resource => (
+                  <div
+                    key={resource.id}
+                    className="bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer group"
+                  >
+                    {/* PDF Preview */}
+                    <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(resource.category)} opacity-20`}></div>
+                      <iframe
+                        src={`/resources/${encodeURIComponent(resource.filename)}#toolbar=0&navpanes=0&scrollbar=0`}
+                        className="w-full h-full pointer-events-none"
+                        title={resource.title}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                        <button
+                          onClick={() => setSelectedResource(resource)}
+                          className="bg-white text-gray-900 px-6 py-2.5 rounded-xl font-bold shadow-lg hover:bg-gray-100 transition-colors"
+                        >
+                          View Full PDF
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-6">
+                      <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${getCategoryColor(resource.category)} mb-3`}>
+                        {resource.category}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+                        {resource.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        {resource.description}
+                      </p>
+
+                      <button
+                        onClick={() => setSelectedResource(resource)}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>View</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* No Results */}
+              {filteredResources.length === 0 && (
+                <div className="text-center py-16">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">No resources found</h3>
+                  <p className="text-gray-600">Try selecting a different category</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {activeCard === 'sample' && (
+            <>
+              <div className="text-center mb-8">
+                <p className="text-lg font-semibold text-gray-800">Tap a blueprint to reveal the quick walkthrough.</p>
+                <p className="text-sm text-gray-600">Choose any framework to see how to structure and deliver your answer.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {sampleFrameworks.map(framework => {
+                  const isOpen = selectedFramework === framework.id
+                  return (
+                    <div key={framework.id} className="space-y-3">
+                      <button
+                        onClick={() => setSelectedFramework(isOpen ? null : framework.id)}
+                        className="w-full text-left"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl font-bold text-gray-900">{framework.id}</span>
+                          <div className={`h-1 flex-1 max-w-[180px] rounded-full bg-gradient-to-r ${framework.accent}`}></div>
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900">{framework.title}</h3>
+                        <p className="text-sm font-semibold text-gray-700">{framework.subtitle}</p>
+                        <p className="text-xs uppercase tracking-wide text-indigo-600 font-bold mt-2">{framework.stepsLabel}</p>
+                      </button>
+
+                      {isOpen && (
+                        <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-3 text-sm text-indigo-900 space-y-2">
+                          {framework.detailLines ? (
+                            framework.detailLines.map(line => (
+                              <div key={line.label}>
+                                <span className="font-bold">{line.label}:</span> {line.text}
+                              </div>
+                            ))
+                          ) : (
+                            framework.detail
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>
