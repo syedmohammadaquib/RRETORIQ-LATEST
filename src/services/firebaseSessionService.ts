@@ -35,7 +35,7 @@ export interface SessionData {
   userId: string
   sessionType: 'ielts' | 'interview' | 'practice'
   interviewType?: 'hr' | 'technical' | 'aptitude' | 'mixed'
-  practiceType?: 'speaking' | 'reading' | 'writing' // For Let's Communicate sessions
+  practiceType?: 'speaking' | 'reading' | 'writing' | 'voice' // For Let's Communicate sessions
   difficulty?: string // For sessions with difficulty levels
   status: 'in-progress' | 'completed' | 'abandoned'
   startTime: Date
@@ -122,21 +122,21 @@ class FirebaseSessionService {
     userId: string,
     sessionType: 'ielts' | 'interview' | 'practice',
     interviewType?: 'hr' | 'technical' | 'aptitude' | 'mixed',
-    practiceType?: 'speaking' | 'reading' | 'writing'
+    practiceType?: 'speaking' | 'reading' | 'writing' | 'voice'
   ): Promise<string> {
     try {
       // Check if user has available seats
       const userRef = doc(db, 'users', userId)
       const userSnap = await getDoc(userRef)
-      
+
       if (userSnap.exists()) {
         const userData = userSnap.data()
         const seats = userData.seats
-        
+
         if (seats && seats.available <= 0) {
           throw new Error('No seats available. Please contact admin to purchase more seats.')
         }
-        
+
         // Decrement available seats atomically
         if (seats) {
           await updateDoc(userRef, {
@@ -146,9 +146,9 @@ class FirebaseSessionService {
           console.log(`💺 Seat consumed. Remaining: ${seats.available - 1}`)
         }
       }
-      
+
       const sessionId = `session_${Date.now()}_${userId.substring(0, 8)}`
-      
+
       const sessionData: Partial<SessionData> = {
         id: sessionId,
         userId,
