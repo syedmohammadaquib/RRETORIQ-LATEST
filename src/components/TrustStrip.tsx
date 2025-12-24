@@ -13,17 +13,10 @@ export interface TrustStripProps {
     variant?: 'light' | 'default'
 }
 
-<<<<<<< HEAD
 export function TrustStrip({
     items,
     variant = 'default'
 }: TrustStripProps) {
-=======
-const TrustStrip: React.FC<TrustStripProps> = ({
-    items,
-    variant = 'default'
-}) => {
->>>>>>> 2e8ac85058d7a8eaab261e1f5df51c3dca0ae9d1
     const ref = useScrollAnimation('fadeIn')
 
     const defaultItems: TrustProofItem[] = items || [
