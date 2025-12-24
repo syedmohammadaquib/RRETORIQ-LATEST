@@ -12,11 +12,12 @@ export interface SessionLimits {
   techInterview: { used: number; limit: number }
   hrInterview: { used: number; limit: number }
   aptitudeInterview: { used: number; limit: number }
-  
+
   // Let's Communicate limits
   speaking: { used: number; limit: number }
   reading: { used: number; limit: number }
   writing: { used: number; limit: number }
+  voice: { used: number; limit: number }
 }
 
 export interface SessionTypeConfig {
@@ -30,11 +31,12 @@ export const SESSION_LIMITS: Record<string, SessionTypeConfig> = {
   'interview-tech': { monthlyLimit: 4 },
   'interview-hr': { monthlyLimit: 4 },
   'interview-aptitude': { monthlyLimit: 4 },
-  
+
   // Let's Communicate
   'practice-speaking': { monthlyLimit: 4 },
   'practice-reading': { monthlyLimit: 4, maxQuestionsPerSession: 3 },
-  'practice-writing': { monthlyLimit: 2, maxQuestionsPerSession: 2 }
+  'practice-writing': { monthlyLimit: 2, maxQuestionsPerSession: 2 },
+  'practice-voice': { monthlyLimit: 4 }
 }
 
 class SessionLimitService {
@@ -54,49 +56,54 @@ class SessionLimitService {
   async getMonthlyUsage(userId: string): Promise<SessionLimits> {
     try {
       const { start, end } = this.getCurrentMonthRange()
-      
+
       const sessionsQuery = query(
         collection(db, 'sessions'),
         where('userId', '==', userId),
         where('startTime', '>=', Timestamp.fromDate(start)),
         where('startTime', '<=', Timestamp.fromDate(end))
       )
-      
+
       const snapshot = await getDocs(sessionsQuery)
       const sessions = snapshot.docs.map(doc => doc.data())
-      
+
       // Count sessions by type
-      const techInterviewCount = sessions.filter((s: any) => 
+      const techInterviewCount = sessions.filter((s: any) =>
         s.status === 'completed' && s.sessionType === 'interview' && s.difficulty === 'technical'
       ).length
-      
-      const hrInterviewCount = sessions.filter((s: any) => 
+
+      const hrInterviewCount = sessions.filter((s: any) =>
         s.status === 'completed' && s.sessionType === 'interview' && s.difficulty === 'hr'
       ).length
-      
-      const aptitudeInterviewCount = sessions.filter((s: any) => 
+
+      const aptitudeInterviewCount = sessions.filter((s: any) =>
         s.status === 'completed' && s.sessionType === 'interview' && s.difficulty === 'aptitude'
       ).length
-      
-      const speakingCount = sessions.filter((s: any) => 
+
+      const speakingCount = sessions.filter((s: any) =>
         s.status === 'completed' && (s.sessionType === 'practice' || s.sessionType === 'ielts') && s.practiceType === 'speaking'
       ).length
-      
-      const readingCount = sessions.filter((s: any) => 
+
+      const readingCount = sessions.filter((s: any) =>
         s.status === 'completed' && (s.sessionType === 'practice' || s.sessionType === 'ielts') && s.practiceType === 'reading'
       ).length
-      
-      const writingCount = sessions.filter((s: any) => 
+
+      const writingCount = sessions.filter((s: any) =>
         s.status === 'completed' && (s.sessionType === 'practice' || s.sessionType === 'ielts') && s.practiceType === 'writing'
       ).length
-      
+
+      const voiceCount = sessions.filter((s: any) =>
+        s.status === 'completed' && (s.sessionType === 'practice' || s.sessionType === 'ielts') && s.practiceType === 'voice'
+      ).length
+
       return {
         techInterview: { used: techInterviewCount, limit: 4 },
         hrInterview: { used: hrInterviewCount, limit: 4 },
         aptitudeInterview: { used: aptitudeInterviewCount, limit: 4 },
         speaking: { used: speakingCount, limit: 4 },
         reading: { used: readingCount, limit: 4 },
-        writing: { used: writingCount, limit: 2 }
+        writing: { used: writingCount, limit: 2 },
+        voice: { used: voiceCount, limit: 4 }
       }
     } catch (error) {
       console.error('Error fetching monthly usage:', error)
@@ -106,7 +113,8 @@ class SessionLimitService {
         aptitudeInterview: { used: 0, limit: 4 },
         speaking: { used: 0, limit: 4 },
         reading: { used: 0, limit: 4 },
-        writing: { used: 0, limit: 2 }
+        writing: { used: 0, limit: 2 },
+        voice: { used: 0, limit: 4 }
       }
     }
   }
@@ -117,35 +125,35 @@ class SessionLimitService {
   async canStartSession(userId: string, sessionType: 'interview' | 'practice' | 'ielts', practiceType?: string, difficulty?: string): Promise<{ allowed: boolean; reason?: string; remaining?: number }> {
     try {
       const usage = await this.getMonthlyUsage(userId)
-      
+
       // Check interview sessions
       if (sessionType === 'interview') {
         if (difficulty === 'technical') {
           if (usage.techInterview.used >= usage.techInterview.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.techInterview.limit} Technical Interview sessions. Limit resets next month.`,
               remaining: 0
             }
           }
           return { allowed: true, remaining: usage.techInterview.limit - usage.techInterview.used }
         }
-        
+
         if (difficulty === 'hr') {
           if (usage.hrInterview.used >= usage.hrInterview.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.hrInterview.limit} HR Interview sessions. Limit resets next month.`,
               remaining: 0
             }
           }
           return { allowed: true, remaining: usage.hrInterview.limit - usage.hrInterview.used }
         }
-        
+
         if (difficulty === 'aptitude') {
           if (usage.aptitudeInterview.used >= usage.aptitudeInterview.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.aptitudeInterview.limit} Aptitude Interview sessions. Limit resets next month.`,
               remaining: 0
             }
@@ -153,43 +161,54 @@ class SessionLimitService {
           return { allowed: true, remaining: usage.aptitudeInterview.limit - usage.aptitudeInterview.used }
         }
       }
-      
+
       // Check practice sessions (Let's Communicate)
       if (sessionType === 'practice' || sessionType === 'ielts') {
         if (practiceType === 'speaking') {
           if (usage.speaking.used >= usage.speaking.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.speaking.limit} Speaking sessions. Limit resets next month.`,
               remaining: 0
             }
           }
           return { allowed: true, remaining: usage.speaking.limit - usage.speaking.used }
         }
-        
+
         if (practiceType === 'reading') {
           if (usage.reading.used >= usage.reading.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.reading.limit} Reading sessions. Limit resets next month.`,
               remaining: 0
             }
           }
           return { allowed: true, remaining: usage.reading.limit - usage.reading.used }
         }
-        
+
         if (practiceType === 'writing') {
           if (usage.writing.used >= usage.writing.limit) {
-            return { 
-              allowed: false, 
+            return {
+              allowed: false,
               reason: `You've reached your monthly limit of ${usage.writing.limit} Writing sessions. Limit resets next month.`,
               remaining: 0
             }
           }
           return { allowed: true, remaining: usage.writing.limit - usage.writing.used }
         }
+
+        if (practiceType === 'voice') {
+          if (usage.voice.used >= usage.voice.limit) {
+            return {
+              allowed: false,
+              reason: `You've reached your monthly limit of ${usage.voice.limit} Voice sessions. Limit resets next month.`,
+              remaining: 0
+            }
+          }
+          return { allowed: true, remaining: usage.voice.limit - usage.voice.used }
+        }
       }
-      
+
       // Default allow if type not recognized
       return { allowed: true }
     } catch (error) {

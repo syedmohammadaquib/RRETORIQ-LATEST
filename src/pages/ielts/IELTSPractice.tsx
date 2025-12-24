@@ -10,7 +10,8 @@ import {
   PenTool,
   MessageSquare,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  Volume2
 } from 'lucide-react'
 import { speakingQuestions, type CommunicationQuestion } from '../../data/communicationQuestions'
 import { readingImageQuestions, type ReadingImageQuestion } from '../../data/readingImageQuestions'
@@ -25,7 +26,7 @@ import { sessionLimitService } from '../../services/sessionLimitService'
 
 export default function IELTSPractice() {
   const navigate = useNavigate()
-  const [selectedType, setSelectedType] = useState<'speaking' | 'reading' | 'writing'>('speaking')
+  const [selectedType, setSelectedType] = useState<'speaking' | 'reading' | 'writing' | 'voice'>('speaking')
   const [currentQuestion, setCurrentQuestion] = useState<CommunicationQuestion | null>(null)
   const [currentReadingQuestion, setCurrentReadingQuestion] = useState<ReadingImageQuestion | null>(null)
   const [responses, setResponses] = useState<{ [key: string]: string }>({})
@@ -57,7 +58,8 @@ export default function IELTSPractice() {
       description: 'Practice speaking skills with real-time recording',
       limit: '4 sessions/month',
       color: 'bg-blue-500',
-      hoverColor: 'hover:bg-blue-600'
+      hoverColor: 'hover:bg-blue-600',
+      stats: { questions: '3-4', duration: '15-20m', level: 'Mid' }
     },
     {
       type: 'reading' as const,
@@ -66,7 +68,8 @@ export default function IELTSPractice() {
       description: 'Enhance reading skills with comprehension tasks',
       limit: '4 sessions/month • Max 3 questions',
       color: 'bg-purple-500',
-      hoverColor: 'hover:bg-purple-600'
+      hoverColor: 'hover:bg-purple-600',
+      stats: { questions: 'Max 3', duration: '10-15m', level: 'Mid' }
     },
     {
       type: 'writing' as const,
@@ -75,7 +78,18 @@ export default function IELTSPractice() {
       description: 'Develop writing abilities with structured tasks',
       limit: '2 sessions/month • Max 2 questions',
       color: 'bg-orange-500',
-      hoverColor: 'hover:bg-orange-600'
+      hoverColor: 'hover:bg-orange-600',
+      stats: { questions: 'Max 2', duration: '10-15m', level: 'Mid' }
+    },
+    {
+      type: 'voice' as const,
+      title: 'Voice',
+      icon: <Volume2 className="w-6 h-6" />,
+      description: 'Analyze your voice pitch, pace and clarity',
+      limit: '4 sessions/month',
+      color: 'bg-emerald-500',
+      hoverColor: 'hover:bg-emerald-600',
+      stats: { questions: '3-4', duration: '15-20m', level: 'Mid' }
     }
   ]
 
@@ -135,7 +149,7 @@ export default function IELTSPractice() {
           await firebaseSessionService.saveAnswer(sessionId, {
             questionId: activeQuestionId,
             questionText: activeQuestionText || 'Unknown Question',
-            questionType: isReading ? 'reading' : 'speaking',
+            questionType: isReading ? 'reading' : (selectedType === 'voice' ? 'voice' : 'speaking'),
             difficulty: isReading ? 'medium' : (currentQuestion?.difficulty.toLowerCase() || 'medium'),
             transcription: currentTranscription,
             analysis: analysisResult,
@@ -165,7 +179,7 @@ export default function IELTSPractice() {
     // Check session limits before starting
     const limitCheck = await sessionLimitService.canStartSession(
       auth.currentUser.uid,
-      'practice',
+      'ielts',
       selectedType
     )
 
@@ -190,7 +204,7 @@ export default function IELTSPractice() {
     try {
       const newSessionId = await firebaseSessionService.createSession(
         auth.currentUser.uid,
-        'practice', // Using 'practice' sessionType
+        'ielts', // Using 'ielts' sessionType
         undefined, // No interview type for practice sessions
         selectedType // practiceType: speaking, reading, or writing
       )
@@ -200,8 +214,8 @@ export default function IELTSPractice() {
       console.error('❌ Failed to create session:', error)
     }
 
-    // Filter questions by selected difficulty for speaking
-    if (selectedType === 'speaking') {
+    // Filter questions by selected difficulty for speaking or voice
+    if (selectedType === 'speaking' || selectedType === 'voice') {
       const filteredQuestions = speakingQuestions.filter(
         q => q.difficulty === preferences.difficulty
       )
@@ -526,10 +540,10 @@ export default function IELTSPractice() {
                   </div>
                 )}
 
-                {selectedType === 'speaking' && currentQuestion && (
+                {(selectedType === 'speaking' || selectedType === 'voice') && currentQuestion && (
                   <div className="flex-1">
                     <AudioRecorder
-                      key={`speaking-${currentQuestionIndex}`}
+                      key={`${selectedType}-${currentQuestionIndex}`}
                       question={convertToInterviewQuestion(currentQuestion)}
                       onAnalysisComplete={handleAnalysisComplete}
                       onTranscriptionComplete={handleTranscriptionComplete}
@@ -598,8 +612,8 @@ export default function IELTSPractice() {
     )
   }
 
-  // Preferences Screen (only for Speaking - Reading has no difficulty)
-  if (showPreferences && selectedType === 'speaking') {
+  // Preferences Screen (only for Speaking/Voice - Reading has no difficulty)
+  if (showPreferences && (selectedType === 'speaking' || selectedType === 'voice')) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -944,7 +958,7 @@ export default function IELTSPractice() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {skillTypes.map((skill) => (
             <div
               key={skill.type}
@@ -952,44 +966,46 @@ export default function IELTSPractice() {
                 ? 'from-blue-500 to-indigo-600'
                 : skill.type === 'reading'
                   ? 'from-purple-500 to-violet-600'
-                  : 'from-orange-500 to-amber-600'
-                } rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden`}
+                  : skill.type === 'writing'
+                    ? 'from-orange-500 to-amber-600'
+                    : 'from-emerald-500 to-teal-600'
+                } rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col h-full`}
               onClick={() => {
                 setSelectedType(skill.type)
                 setShowPreferences(true)
               }}
             >
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-              <div className="relative z-10">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="relative z-10 flex flex-col h-full uppercase-none">
+                <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shrink-0">
                   <div className="text-white">
                     {skill.icon}
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{skill.title}</h3>
-                <p className="text-white/90 mb-5 leading-relaxed text-sm">{skill.description}</p>
+                <h3 className="text-xl font-bold text-white mb-2 shrink-0">{skill.title}</h3>
+                <p className="text-white/90 mb-6 leading-relaxed text-sm min-h-[40px] flex-grow">{skill.description}</p>
 
-                <div className="grid grid-cols-3 gap-3 text-xs mb-5">
-                  <div className="text-center">
-                    <div className="font-bold text-white text-sm">3-4</div>
-                    <div className="text-white/80">Questions</div>
+                <div className="grid grid-cols-3 gap-2 text-[10px] sm:text-xs mb-6 shrink-0">
+                  <div className="text-center p-1 rounded-lg bg-white/10">
+                    <div className="font-bold text-white text-xs sm:text-sm">{skill.stats.questions}</div>
+                    <div className="text-white/80 whitespace-nowrap overflow-hidden text-ellipsis">Questions</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-bold text-white text-sm">15-20 min</div>
-                    <div className="text-white/80">Duration</div>
+                  <div className="text-center p-1 rounded-lg bg-white/10">
+                    <div className="font-bold text-white text-xs sm:text-sm">{skill.stats.duration}</div>
+                    <div className="text-white/80 whitespace-nowrap overflow-hidden text-ellipsis">Duration</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-bold text-white text-sm">Intermediate</div>
-                    <div className="text-white/80">Difficulty</div>
+                  <div className="text-center p-1 rounded-lg bg-white/10">
+                    <div className="font-bold text-white text-xs sm:text-sm">{skill.stats.level}</div>
+                    <div className="text-white/80 whitespace-nowrap overflow-hidden text-ellipsis">Level</div>
                   </div>
                 </div>
 
                 {/* Monthly Limit Info */}
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 mb-4">
-                  <p className="text-white/90 text-xs font-medium text-center">{skill.limit}</p>
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2.5 mb-5 shrink-0 min-h-[48px] flex items-center justify-center">
+                  <p className="text-white text-[10px] sm:text-xs font-semibold text-center leading-tight">{skill.limit}</p>
                 </div>
 
-                <button className="w-full bg-white text-gray-900 py-3 px-4 rounded-xl hover:bg-white/90 transition-colors font-bold shadow-lg">
+                <button className="w-full bg-white text-gray-900 py-3 px-4 rounded-xl hover:bg-white/90 transition-colors font-bold shadow-lg mt-auto">
                   Start Practice
                 </button>
               </div>
