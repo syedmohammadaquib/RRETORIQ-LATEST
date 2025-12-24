@@ -22,8 +22,7 @@ export const auth = getAuth(app)
 // Force long-polling to avoid offline errors on restrictive networks/proxies
 export const db = typeof window !== 'undefined'
   ? initializeFirestore(app, {
-    experimentalForceLongPolling: true,
-    useFetchStreams: false
+    experimentalForceLongPolling: true
   })
   : getFirestore(app)
 export const storage = getStorage(app)
