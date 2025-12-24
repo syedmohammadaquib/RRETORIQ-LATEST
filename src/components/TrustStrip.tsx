@@ -13,7 +13,7 @@ interface TrustStripProps {
     variant?: 'light' | 'default'
 }
 
-export const TrustStrip: React.FC<TrustStripProps> = ({
+const TrustStrip: React.FC<TrustStripProps> = ({
     items,
     variant = 'default'
 }) => {
