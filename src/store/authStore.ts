@@ -380,6 +380,12 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true })
 
         let settled = false
+        let unsubscribe: () => void = () => { }
+
+        // Some networks/extensions can block the initial auth event; authStateReady()
+        // gives us a deterministic resolution path to avoid the watchdog firing.
+        const authReadyPromise = (auth as any).authStateReady?.() ?? Promise.resolve()
+
         const watchdog = setTimeout(() => {
           if (!settled) {
             console.warn('Auth initialization watchdog fired — marking not-loading to avoid indefinite spinner')
@@ -387,7 +393,7 @@ export const useAuthStore = create<AuthStore>()(
           }
         }, 10000) // 10s
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
           try {
             if (firebaseUser) {
               const user = await convertFirebaseUser(firebaseUser)
@@ -430,6 +436,46 @@ export const useAuthStore = create<AuthStore>()(
             clearTimeout(watchdog)
           }
         })
+
+        // If the ready promise resolves before onAuthStateChanged fires, settle state to avoid the watchdog.
+        authReadyPromise
+          .then(async () => {
+            if (settled) return
+
+            const firebaseUser = auth.currentUser
+            if (firebaseUser) {
+              const user = await convertFirebaseUser(firebaseUser)
+              set({
+                user,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+                profileCompleted: user.profileCompleted || false,
+                isNewUser: user.isNewUser || false
+              })
+            } else {
+              set({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: null,
+                profileCompleted: false,
+                isNewUser: false
+              })
+            }
+
+            settled = true
+            clearTimeout(watchdog)
+            unsubscribe()
+          })
+          .catch((err: unknown) => {
+            console.warn('authStateReady rejected; continuing with watcher fallback', err)
+            if (!settled) {
+              set({ isLoading: false })
+              settled = true
+              clearTimeout(watchdog)
+            }
+          })
 
         // Return unsubscribe function
         return unsubscribe

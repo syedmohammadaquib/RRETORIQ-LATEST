@@ -13,13 +13,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
-
-// Initialize Firebase services
 export const auth = getAuth(app)
-// Use long-polling in dev/proxyed networks to avoid "client is offline"
-// Force long-polling to avoid offline errors on restrictive networks/proxies
 export const db = typeof window !== 'undefined'
   ? initializeFirestore(app, {
     experimentalForceLongPolling: true
