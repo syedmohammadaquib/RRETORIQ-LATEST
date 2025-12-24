@@ -10,16 +10,12 @@
  * Example:
  *   node scripts/setAdminClaim.js admin@university.edu
  */
+var admin = require("firebase-admin");
 
-const admin = require('firebase-admin');
-const path = require('path');
-
-// Initialize Firebase Admin SDK with service account
-const serviceAccount = require(path.join(__dirname, '..', '..', 'rretoriq25-firebase-adminsdk-fbsvc-6e2a60ea50.json'));
+var serviceAccount = require("path/to/serviceAccountKey.json");
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  projectId: 'rretoriq25'
+  credential: admin.credential.cert(serviceAccount)
 });
 
 /**
@@ -29,33 +25,33 @@ admin.initializeApp({
 async function setAdminClaim(email) {
   try {
     console.log(`🔍 Looking up user: ${email}...`);
-    
+
     // Get user by email
     const user = await admin.auth().getUserByEmail(email);
-    
+
     console.log(`✅ User found: ${user.uid}`);
     console.log(`📧 Email: ${user.email}`);
     console.log(`👤 Display Name: ${user.displayName || 'Not set'}`);
-    
+
     // Set custom claim
     await admin.auth().setCustomUserClaims(user.uid, { admin: true });
-    
+
     console.log(`\n🎉 SUCCESS! Admin claim set for ${email}`);
     console.log(`\n⚠️  IMPORTANT: User must log out and log back in for changes to take effect.`);
-    
+
     // Verify the claim was set
     const updatedUser = await admin.auth().getUser(user.uid);
     console.log(`\n🔍 Verification - Custom Claims:`, updatedUser.customClaims);
-    
+
     process.exit(0);
   } catch (error) {
     console.error('\n❌ ERROR:', error.message);
-    
+
     if (error.code === 'auth/user-not-found') {
       console.log(`\n💡 User with email "${email}" does not exist in Firebase Auth.`);
       console.log(`   Please create the user account first, then run this script again.`);
     }
-    
+
     process.exit(1);
   }
 }
@@ -66,10 +62,10 @@ async function setAdminClaim(email) {
 async function listAdmins() {
   try {
     console.log('📋 Listing all users with admin claims...\n');
-    
+
     const listUsers = await admin.auth().listUsers(1000);
     const admins = listUsers.users.filter(user => user.customClaims?.admin === true);
-    
+
     if (admins.length === 0) {
       console.log('No admin users found.');
     } else {
@@ -78,7 +74,7 @@ async function listAdmins() {
         console.log(`${index + 1}. ${user.email} (UID: ${user.uid})`);
       });
     }
-    
+
     process.exit(0);
   } catch (error) {
     console.error('❌ ERROR:', error.message);
@@ -140,7 +136,7 @@ switch (command.toLowerCase()) {
     }
     setAdminClaim(args[1]);
     break;
-    
+
   case 'remove':
     if (!args[1]) {
       console.error('❌ Error: Email address required');
@@ -149,11 +145,11 @@ switch (command.toLowerCase()) {
     }
     removeAdminClaim(args[1]);
     break;
-    
+
   case 'list':
     listAdmins();
     break;
-    
+
   default:
     // Backward compatibility: if no command specified, assume 'set'
     if (command.includes('@')) {

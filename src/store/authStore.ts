@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   onAuthStateChanged,
   updateProfile
@@ -211,7 +212,22 @@ export const useAuthStore = create<AuthStore>()(
       loginWithGoogle: async () => {
         try {
           set({ isLoading: true, error: null })
-          const userCredential = await signInWithPopup(auth, googleProvider)
+          const forceRedirectEnv = import.meta.env.VITE_FORCE_GOOGLE_REDIRECT === 'true'
+          const isCrossOriginIsolated = typeof window !== 'undefined' && window.crossOriginIsolated === true
+          const shouldRedirect = forceRedirectEnv || isCrossOriginIsolated
+
+          // Prefer popup when allowed; fall back (or force) redirect to avoid COOP/COEP window.close warnings.
+          const doPopup = async () => signInWithPopup(auth, googleProvider)
+          const doRedirect = async () => {
+            await signInWithRedirect(auth, googleProvider)
+            // Redirect flow leaves page; return null to satisfy typing.
+            return null as unknown as Awaited<ReturnType<typeof doPopup>>
+          }
+
+          const userCredential = shouldRedirect ? await doRedirect() : await doPopup()
+
+          // If redirect was triggered, bail; onAuthStateChanged will handle state after redirect.
+          if (!userCredential) return
 
           // Check if this is a new user
           const existingProfile = await userProfileService.getUserProfile(userCredential.user.uid)
@@ -242,6 +258,19 @@ export const useAuthStore = create<AuthStore>()(
             isNewUser
           })
         } catch (error: any) {
+          // COOP/COEP can throw DOMException on popup polling; fall back to redirect once.
+          const message = error?.message?.toLowerCase?.() || ''
+          const isCoopBlocked = message.includes('opener') || message.includes('cross-origin-opener-policy') || message.includes('closed call')
+
+          if (!message.includes('redirect') && isCoopBlocked) {
+            try {
+              await signInWithRedirect(auth, googleProvider)
+              return
+            } catch (redirectErr: any) {
+              console.error('Google redirect fallback failed:', redirectErr)
+            }
+          }
+
           const errorMessage = error.code?.replace('auth/', '').replace('-', ' ') || 'Google login failed'
           set({
             error: errorMessage,
@@ -380,6 +409,12 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true })
 
         let settled = false
+        let unsubscribe: () => void = () => { }
+
+        // Some networks/extensions can block the initial auth event; authStateReady()
+        // gives us a deterministic resolution path to avoid the watchdog firing.
+        const authReadyPromise = (auth as any).authStateReady?.() ?? Promise.resolve()
+
         const watchdog = setTimeout(() => {
           if (!settled) {
             console.warn('Auth initialization watchdog fired — marking not-loading to avoid indefinite spinner')
@@ -387,7 +422,7 @@ export const useAuthStore = create<AuthStore>()(
           }
         }, 10000) // 10s
 
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
           try {
             if (firebaseUser) {
               const user = await convertFirebaseUser(firebaseUser)
@@ -430,6 +465,46 @@ export const useAuthStore = create<AuthStore>()(
             clearTimeout(watchdog)
           }
         })
+
+        // If the ready promise resolves before onAuthStateChanged fires, settle state to avoid the watchdog.
+        authReadyPromise
+          .then(async () => {
+            if (settled) return
+
+            const firebaseUser = auth.currentUser
+            if (firebaseUser) {
+              const user = await convertFirebaseUser(firebaseUser)
+              set({
+                user,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+                profileCompleted: user.profileCompleted || false,
+                isNewUser: user.isNewUser || false
+              })
+            } else {
+              set({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: null,
+                profileCompleted: false,
+                isNewUser: false
+              })
+            }
+
+            settled = true
+            clearTimeout(watchdog)
+            unsubscribe()
+          })
+          .catch((err: unknown) => {
+            console.warn('authStateReady rejected; continuing with watcher fallback', err)
+            if (!settled) {
+              set({ isLoading: false })
+              settled = true
+              clearTimeout(watchdog)
+            }
+          })
 
         // Return unsubscribe function
         return unsubscribe

@@ -13,15 +13,11 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 }
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
-
-// Initialize Firebase services
 export const auth = getAuth(app)
-// Use long-polling in dev/proxyed networks to avoid "client is offline"
 export const db = typeof window !== 'undefined'
   ? initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
+    experimentalForceLongPolling: true
   })
   : getFirestore(app)
 export const storage = getStorage(app)
@@ -31,4 +27,4 @@ export const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope('email')
 googleProvider.addScope('profile')
 
-export default app
+export default app;
