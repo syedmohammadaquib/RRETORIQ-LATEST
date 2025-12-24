@@ -1,12 +1,15 @@
 export interface CommunicationQuestion {
   id: string
-  type: 'speaking' | 'reading' | 'writing'
+  type: 'speaking' | 'reading' | 'writing' | 'voice'
   difficulty: 'Easy' | 'Medium' | 'Hard'
   question: string
   timeLimit: number // in seconds
   instructions: string
   expectedAnswerLength?: number
   keyPoints?: string[]
+  audioPath?: string // For Situational Audio Practice
+  skills?: string[] // Skills evaluated in this scenario
+  framework?: string // Ideal framework to use for response (e.g., STAR)
 }
 
 // General Communication - Speaking Questions
@@ -996,7 +999,225 @@ export const speakingQuestions: CommunicationQuestion[] = [
   }
 ]
 
+// Situational Audio Practice Questions
+export const voiceQuestions: CommunicationQuestion[] = [
+  {
+    id: "voice-easy-001",
+    type: "voice",
+    difficulty: "Easy",
+    question: "The \"Borrowed Grade\": It's the night before the Final Year Project submission. Your partner, who has contributed nothing all year due to 'personal issues,' begs you to include their name on the code you wrote entirely by yourself. They say, 'If I don't pass this, I lose my job offer and my degree. Please, I'll pay you or do your chores for a year.' You worked 200 hours on this. They worked zero. The submission portal requires a 'Contribution Percentage' for each member. If you put 100% for yourself, they fail. If you put 50/50, you are lying to the university. Question: How do you handle the 'Free Rider' without being the 'Villain'?",
+    timeLimit: 60,
+    instructions: "Handle a difficult academic integrity situation involving a personal friend and high stakes.",
+    audioPath: "/audio/The Borrowed Grade.mp3",
+    keyPoints: [
+      "Listen openly",
+      "Ask questions",
+      "Apply feedback",
+      "Improve continuously"
+    ],
+    skills: ["Coachability", "Emotional Intelligence", "Growth Mindset"],
+    framework: "STAR"
+  },
+  {
+    id: "voice-easy-002",
+    type: "voice",
+    difficulty: "Easy",
+    question: "The Fake Internship: You're offered an internship that turns out to be unpaid labor with no learning. How do you handle the exit?",
+    timeLimit: 60,
+    instructions: "Listen to the employer's pitch and professionally decline or discuss the terms.",
+    audioPath: "/audio/The Fake Internship.mp3",
+    keyPoints: ["Know your value", "Be professional", "Set boundaries"]
+  },
+  {
+    id: "voice-easy-003",
+    type: "voice",
+    difficulty: "Easy",
+    question: "The Ghosted Client: You've just taken over a client who was ignored for weeks. What's your first move?",
+    timeLimit: 60,
+    instructions: "Listen to the frustrated client and attempt to de-escalate the situation.",
+    audioPath: "/audio/The Ghosted Client.mp3",
+    keyPoints: ["Empathize", "Take ownership", "Actionable next steps"]
+  },
+  {
+    id: "voice-medium-001",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The \"Stolen Project\": You've spent six months developing an innovative AI app for the college tech-fest. You shared your documentation with a junior you were mentoring, trusting them to learn from it. On the day of the fest, you walk in to find that the junior has submitted your project under their own name. Because they submitted it two hours before you, the system flags your submission as the duplicate. The junior comes to you crying, saying they were under immense pressure from their parents to win. They beg you not to report them. The judges are about to announce the winner. Question: Do you expose the junior and reclaim your hard work, or do you sacrifice your credit to save a younger student's reputation?",
+    timeLimit: 90,
+    instructions: "Address a betrayal of trust and intellectual property theft while considering the ethical implications and pressure on others.",
+    audioPath: "/audio/The Borrowed Research.mp3",
+    keyPoints: [
+      "Recognize issue",
+      "Refuse shortcut",
+      "Suggest ethical option",
+      "Escalate if needed"
+    ],
+    skills: ["Integrity", "Ethical Reasoning", "Responsibility"],
+    framework: "PAR"
+  },
+  {
+    id: "voice-medium-002",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The \"Client's False Hope\": You are the lead engineer on a call with a global client. Your Sales Head is desperate to close this million-dollar deal to save the company from a bad quarter. The client asks, 'Can this system handle 10,000 concurrent users without lag?' You know the limit is 5,000. Before you can speak, the Sales Head says, 'Absolutely! It can handle 15,000 easily.' The client picks up the pen to sign. Your Sales Head looks at you and says, 'Right, [Your Name]? Our Lead Engineer can confirm.' Every eye in the room is on you. Question: Do you lie to save the deal and the company's quarter, or do you tell the truth and risk losing the contract?",
+    timeLimit: 90,
+    instructions: "Manage complex client-facing expectations while maintaining ethics and honesty under pressure from leadership.",
+    audioPath: "/audio/The Client's False Hope.mp3",
+    keyPoints: [
+      "Clarify misunderstanding",
+      "Explain limits",
+      "Offer alternatives",
+      "Maintain trust"
+    ],
+    skills: ["Client Communication", "Expectation Management", "Ethics", "Problem Solving"],
+    framework: "STAR"
+  },
+  {
+    id: "voice-medium-003",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The Club Funds: You found a discrepancy in the student club's accounts. How do you report it?",
+    timeLimit: 90,
+    instructions: "Listen to the club president's explanation and decide how to proceed.",
+    audioPath: "/audio/The Club Funds.mp3",
+    keyPoints: ["Focus on facts", "Transparency", "Accountability"]
+  },
+  {
+    id: "voice-medium-004",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The Credit Stealer: You and your colleague, Rahul, worked all weekend on a technical solution for a major client. You did the heavy lifting on the coding and logic, while Rahul handled the PowerPoint presentation. During the meeting with the Manager, Rahul presents the solution using \"I\" instead of \"We,\" making it look like the entire technical breakthrough was his idea. The Manager is highly impressed and hints at a promotion for Rahul. Question: The meeting has just ended. Rahul is walking back to his desk, smiling. Do you confront him immediately in the hallway, wait to talk to him privately, or send an email to the Manager clarifying your contribution with proof? What is the most professional way to handle this without looking 'bitter'?",
+    timeLimit: 90,
+    instructions: "Address the issue professionally while maintaining the working relationship. Aim to clarify your contribution without sounding bitter.",
+    audioPath: "/audio/The Credit Stealer.mp3",
+    keyPoints: [
+      "Address issue calmly",
+      "Clarify contribution",
+      "Choose right timing",
+      "Maintain relationship"
+    ],
+    skills: ["Communication", "Assertiveness", "Professionalism", "Conflict Management"],
+    framework: "STAR"
+  },
+  {
+    id: "voice-medium-005",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The Diversity Hire: You overhear HR discussing a colleague's background in an unprofessional way. How do you intervene?",
+    timeLimit: 90,
+    instructions: "Listen to the conversation and decide if/how to address the bias.",
+    audioPath: "/audio/The Diversity Hire.mp3",
+    keyPoints: ["Address the behavior", "Stay professional", "Uphold values"]
+  },
+  {
+    id: "voice-medium-006",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The Manager's Shadow: Your manager wants to join every single client call you have. How do you ask for autonomy?",
+    timeLimit: 90,
+    instructions: "Listen to the manager's 'supportive' offer and negotiate your independence.",
+    audioPath: "/audio/The Manager's Shadow.mp3",
+    keyPoints: ["Show competence", "Explain impact on flow", "Suggest weekly syncs"]
+  },
+  {
+    id: "voice-medium-006",
+    type: "voice",
+    difficulty: "Medium",
+    question: "The Over-Allocated Lead: Your lead is clearly burned out and missed a critical deadline. How do you support them?",
+    timeLimit: 90,
+    instructions: "Listen to the lead's frustration and offer a constructive path forward.",
+    audioPath: "/audio/The Over-Allocated Lead.mp3",
+    keyPoints: ["Empathy", "Practical help", "Respectful escalation"]
+  },
+  {
+    id: "voice-hard-001",
+    type: "voice",
+    difficulty: "Hard",
+    question: "The \"Whistleblower's Price\": While auditing the company's server logs, you discover that the VP of Engineering has been selling user data to a third-party marketing firm. This is a massive violation of privacy laws. Before you can report it, the VP calls you into his office. He offers you a massive promotion and a 'discretionary bonus' that would pay off your entire education loan. He says, 'It's a win-win. The users aren't hurt, and you're set for life.' If you take the money, you're complicit in a crime. If you report it, the VP is powerful enough to make sure you never work in the tech industry again. Question: Is your integrity worth more than your financial freedom and career security?",
+    timeLimit: 120,
+    instructions: "Confront a major legal and ethical violation involving senior leadership and significant personal incentives.",
+    audioPath: "/audio/The Bug in the Bank.mp3",
+    keyPoints: [
+      "Stay calm",
+      "Acknowledge concern",
+      "Identify issue",
+      "Resolve professionally"
+    ],
+    skills: ["Emotional Control", "Client Handling", "Communication"],
+    framework: "STAR"
+  },
+  {
+    id: "voice-hard-002",
+    type: "voice",
+    difficulty: "Hard",
+    question: "The \"Placement Dilemma\": Your best friend, who is struggling financially, desperately needs a job. You both are sitting for a coding round of a dream company. During the online test, you notice that your friend is using a hidden mobile phone to search for answers. The proctor (invigilator) is looking the other way, but the company has a 'zero tolerance' policy. If he gets caught, he’s blacklisted from all future placements. If you don't say anything, he might take a spot from a more deserving, honest candidate. Question: As a friend and a competitor, what do you do? Do you ignore it because of his situation, or do you anonymously report it to maintain the integrity of the process? How do you balance empathy with professional ethics?",
+    timeLimit: 120,
+    instructions: "Navigate this high-stakes ethical conflict. Show how you balance personal relationships with professional integrity and fairness.",
+    audioPath: "/audio/The Compromised Proctor.mp3",
+    keyPoints: [
+      "Acknowledge conflict",
+      "Refuse unethical act",
+      "Offer alternative help",
+      "Stand by values"
+    ],
+    skills: ["Ethical Judgment", "Integrity", "Emotional Intelligence", "Decision-Making"],
+    framework: "PAR"
+  },
+  {
+    id: "voice-hard-003",
+    type: "voice",
+    difficulty: "Hard",
+    question: "The \"Legacy Code\" Trap: You've been at your dream job for three months. Tomorrow is the launch of the company's biggest product. But while running a final check, you find a critical security flaw in the legacy code—code that was written by your current boss five years ago. You show it to your boss. He frowns and says, 'That's not a bug, it's a feature. If we fix it now, the launch is delayed, and we lose millions. Keep your mouth shut and sign off on the QA report.' If you sign, the product is vulnerable to hackers. If you don't, you are disobeying a direct order from the person who decides your career growth. Question: What do you do? Sign the report, or escalate the issue to the CTO?",
+    timeLimit: 120,
+    instructions: "Handle a critical technical and ethical dilemma involving hierarchy, security risks, and high-stakes deadlines.",
+    audioPath: "/audio/The Legacy Code Trap.mp3",
+    keyPoints: [
+      "Assess scope",
+      "Seek guidance",
+      "Break problem",
+      "Communicate risks"
+    ],
+    skills: ["Problem Solving", "Adaptability", "Time Management", "Technical Communication"],
+    framework: "STAR"
+  },
+  {
+    id: "voice-hard-004",
+    type: "voice",
+    difficulty: "Hard",
+    question: "The \"Placement Betrayal\": It's Day 1 of placements. You and your best friend have reached the final interview round for a high-paying Tech Giant. There is only one vacancy left for your campus. While waiting in the lobby, your friend leaves their phone on the chair. A notification pops up—it's a text from the HR manager of that company. It says: 'Don't worry about the final round, I've got your back. Just don't tell your friend.' You realize your friend has been 'networking' unethically to steal the spot you both worked for. It's your turn to walk into the interview room right now. Question: Do you perform your best and ignore it, or do you mention to the panel that you're aware of the 'internal' selection process?",
+    timeLimit: 120,
+    instructions: "Manage intense emotional and ethical pressure in a competitive collegiate environment.",
+    audioPath: "/audio/The Diversity Hire.mp3",
+    keyPoints: [
+      "Manage emotions",
+      "Support professionality",
+      "Self-reflect",
+      "Stay motivated"
+    ],
+    skills: ["Emotional Intelligence", "Resilience", "Professional Attitude"],
+    framework: "CAR"
+  },
+  {
+    id: "voice-hard-005",
+    type: "voice",
+    difficulty: "Hard",
+    question: "The \"Cost-Cutting\" Danger: The company is facing a massive financial crunch. To stay afloat, the Procurement Head decides to swap the high-grade industrial sensors in your project with a cheaper, uncertified alternative from a local vendor. You run the simulations. The cheap sensors work fine under normal conditions, but they have a 15% failure rate in extreme heat. Your supervisor says, 'The odds are low. We'll save 2 million dollars. Just sign the safety clearance.' If the sensors fail in the field, it could cause a fire. If you refuse to sign, the project stops, and the company might go bankrupt, leading to 500 people losing their jobs. Question: Do you prioritize the 'mathematical probability' of safety or the 'economic reality' of the company's survival?",
+    timeLimit: 120,
+    instructions: "Balance safety standards against business survival during a financial crisis.",
+    audioPath: "/audio/The Cost-Cutting Danger.mp3",
+    keyPoints: [
+      "Be respectful",
+      "Present facts",
+      "Choose right moment",
+      "Accept decision"
+    ],
+    skills: ["Professional Communication", "Assertiveness", "Respect"],
+    framework: "STAR"
+  }
+]
+
 // Export all questions
 export const communicationQuestions: CommunicationQuestion[] = [
-  ...speakingQuestions
+  ...speakingQuestions,
+  ...voiceQuestions
 ]

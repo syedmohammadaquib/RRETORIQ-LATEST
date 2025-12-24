@@ -6,18 +6,19 @@
  */
 
 import React, { useState } from 'react'
-import { 
-  TrendingUp, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  Target, 
+import {
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Target,
   Award,
   Lightbulb,
   MessageSquare,
   BarChart3,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Sparkles
 } from 'lucide-react'
 import type { AnswerAnalysis } from '../services/openAIAnalysisService'
 
@@ -84,7 +85,7 @@ export const AnalysisResults: React.FC<AnalysisResultsProps> = ({
           <span className={`text-xs font-bold ${getScoreColor(score)} ml-2`}>{score}/100</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-1.5">
-          <div 
+          <div
             className={`h-1.5 rounded-full transition-all duration-500 ${getProgressColor(score)}`}
             style={{ width: `${Math.max(score, 5)}%` }}
           />
@@ -113,6 +114,15 @@ export const AnalysisResults: React.FC<AnalysisResultsProps> = ({
         <p className="text-xs text-gray-600">
           Your response has been analyzed across multiple criteria
         </p>
+
+        {analysis.framework && (
+          <div className="mt-3 flex justify-center">
+            <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
+              <Sparkles className="w-3 h-3 text-indigo-500" />
+              <span>{analysis.framework} FRAMEWORK</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Compact Detailed Scores */}
@@ -122,27 +132,27 @@ export const AnalysisResults: React.FC<AnalysisResultsProps> = ({
           Detailed Scores
         </h3>
         <div className="space-y-2 bg-gray-50 rounded-lg p-3">
-          <ScoreBar 
+          <ScoreBar
             label="Clarity & Articulation"
             score={analysis.scores.clarity}
             icon={<MessageSquare className="w-3.5 h-3.5" />}
           />
-          <ScoreBar 
+          <ScoreBar
             label="Relevance to Question"
             score={analysis.scores.relevance}
             icon={<Target className="w-3.5 h-3.5" />}
           />
-          <ScoreBar 
+          <ScoreBar
             label="Structure & Organization"
             score={analysis.scores.structure}
             icon={<TrendingUp className="w-3.5 h-3.5" />}
           />
-          <ScoreBar 
+          <ScoreBar
             label="Completeness"
             score={analysis.scores.completeness}
             icon={<CheckCircle className="w-3.5 h-3.5" />}
           />
-          <ScoreBar 
+          <ScoreBar
             label="Confidence & Delivery"
             score={analysis.scores.confidence}
             icon={<Award className="w-3.5 h-3.5" />}
@@ -164,12 +174,11 @@ export const AnalysisResults: React.FC<AnalysisResultsProps> = ({
             </div>
             <div>
               <span className="text-gray-600">Efficiency: </span>
-              <span className={`font-semibold capitalize ${
-                analysis.timeManagement.efficiency === 'excellent' ? 'text-green-600' :
+              <span className={`font-semibold capitalize ${analysis.timeManagement.efficiency === 'excellent' ? 'text-green-600' :
                 analysis.timeManagement.efficiency === 'good' ? 'text-blue-600' :
-                analysis.timeManagement.efficiency === 'average' ? 'text-yellow-600' :
-                'text-red-600'
-              }`}>
+                  analysis.timeManagement.efficiency === 'average' ? 'text-yellow-600' :
+                    'text-red-600'
+                }`}>
                 {analysis.timeManagement.efficiency}
               </span>
             </div>
