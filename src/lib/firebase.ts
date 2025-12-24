@@ -19,9 +19,11 @@ const app = initializeApp(firebaseConfig)
 // Initialize Firebase services
 export const auth = getAuth(app)
 // Use long-polling in dev/proxyed networks to avoid "client is offline"
+// Force long-polling to avoid offline errors on restrictive networks/proxies
 export const db = typeof window !== 'undefined'
   ? initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
+    experimentalForceLongPolling: true,
+    useFetchStreams: false
   })
   : getFirestore(app)
 export const storage = getStorage(app)
