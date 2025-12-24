@@ -19,6 +19,7 @@ export interface InterviewQuestion {
   skills: string[]
   expectedDuration: number // in seconds
   category: string
+  framework?: string
 }
 
 export interface AnswerAnalysis {
@@ -47,6 +48,7 @@ export interface AnswerAnalysis {
     pacing: string
   }
   processingTime: number
+  framework?: string
 }
 
 export interface AnalysisRequest {
@@ -277,7 +279,7 @@ Focus on providing constructive, actionable feedback that helps the candidate im
   generateQuickFeedback(transcript: string, duration: number) {
     const wordCount = transcript.split(/\s+/).filter(word => word.length > 0).length
     const wordsPerMinute = Math.round((wordCount / duration) * 60)
-    
+
     return {
       wordCount,
       duration,

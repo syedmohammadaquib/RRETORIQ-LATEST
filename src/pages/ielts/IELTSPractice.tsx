@@ -13,7 +13,7 @@ import {
   ArrowLeft,
   Volume2
 } from 'lucide-react'
-import { speakingQuestions, type CommunicationQuestion } from '../../data/communicationQuestions'
+import { speakingQuestions, voiceQuestions, type CommunicationQuestion } from '../../data/communicationQuestions'
 import { readingImageQuestions, type ReadingImageQuestion } from '../../data/readingImageQuestions'
 import { AudioRecorder } from '../../components/AudioRecorder'
 import type { AnswerAnalysis, InterviewQuestion } from '../../services/geminiAnalysisService'
@@ -83,9 +83,9 @@ export default function IELTSPractice() {
     },
     {
       type: 'voice' as const,
-      title: 'Voice',
+      title: 'Situational Audio Practice',
       icon: <Volume2 className="w-6 h-6" />,
-      description: 'Analyze your voice pitch, pace and clarity',
+      description: 'Listen to real-world situations, think on your feet, and respond the way you would in real life',
       limit: '4 sessions/month',
       color: 'bg-emerald-500',
       hoverColor: 'hover:bg-emerald-600',
@@ -104,7 +104,8 @@ export default function IELTSPractice() {
     difficulty: commQuestion.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
     skills: commQuestion.keyPoints || [],
     expectedDuration: commQuestion.timeLimit,
-    category: 'Communication'
+    category: 'Communication',
+    framework: commQuestion.framework
   })
 
   // Convert ReadingImageQuestion to InterviewQuestion format for AudioRecorder
@@ -216,7 +217,8 @@ export default function IELTSPractice() {
 
     // Filter questions by selected difficulty for speaking or voice
     if (selectedType === 'speaking' || selectedType === 'voice') {
-      const filteredQuestions = speakingQuestions.filter(
+      const questionsToFilter = selectedType === 'speaking' ? speakingQuestions : voiceQuestions
+      const filteredQuestions = questionsToFilter.filter(
         q => q.difficulty === preferences.difficulty
       )
       const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random())
@@ -496,12 +498,32 @@ export default function IELTSPractice() {
                     </div>
 
                     <div className="mb-6">
-                      <h2 className="text-base font-bold text-gray-900 mb-3">Question</h2>
+                      <h2 className="text-base font-bold text-gray-900 mb-3">
+                        {selectedType === 'voice' ? 'Situation' : 'Question'}
+                      </h2>
                       <p className="text-base text-gray-800 leading-relaxed">{currentQuestion.question}</p>
                     </div>
 
+                    {/* Audio Prompt for Situational Practice */}
+                    {selectedType === 'voice' && currentQuestion.audioPath && (
+                      <div className="mb-6 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <p className="text-xs font-semibold text-emerald-700 mb-3 uppercase tracking-wider flex items-center">
+                          <Volume2 className="w-4 h-4 mr-2" />
+                          Listen to the situation
+                        </p>
+                        <audio
+                          controls
+                          className="w-full h-10"
+                          src={encodeURI(currentQuestion.audioPath)}
+                        >
+                          Your browser does not support the audio element.
+                        </audio>
+                        <p className="text-[10px] text-emerald-600 mt-2 font-medium">Click play to hear the situation before responding</p>
+                      </div>
+                    )}
+
                     {currentQuestion.keyPoints && currentQuestion.keyPoints.length > 0 && (
-                      <div className="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
+                      <div className="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg mb-4">
                         <p className="text-xs font-semibold text-gray-700 mb-2">💡 Key Points to Consider:</p>
                         <ul className="space-y-1.5 text-sm text-gray-700">
                           {currentQuestion.keyPoints.map((point, idx) => (
@@ -513,6 +535,29 @@ export default function IELTSPractice() {
                         </ul>
                       </div>
                     )}
+
+                    {/* New Sections from Spreadsheet */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {currentQuestion.skills && currentQuestion.skills.length > 0 && (
+                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                          <p className="text-xs font-semibold text-gray-700 mb-2">🎯 Skills Evaluated:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {currentQuestion.skills.map((skill, idx) => (
+                              <span key={idx} className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {currentQuestion.framework && (
+                        <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-r-lg">
+                          <p className="text-xs font-semibold text-gray-700 mb-2">🧠 Ideal Framework:</p>
+                          <p className="text-sm font-bold text-purple-700">{currentQuestion.framework}</p>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -529,6 +574,7 @@ export default function IELTSPractice() {
                       maxDuration={90}
                       autoStop={true}
                       showTranscription={false}
+                      useStaticAnalysis={true}
                     />
 
                     {/* Analysis Results */}
@@ -550,6 +596,7 @@ export default function IELTSPractice() {
                       maxDuration={Math.min(currentQuestion.timeLimit, 60)}
                       autoStop={true}
                       showTranscription={false}
+                      useStaticAnalysis={selectedType === 'speaking' || selectedType === 'voice'}
                     />
 
                     {/* Analysis Results - Only show analysis, not transcription */}

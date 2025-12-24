@@ -24,6 +24,7 @@ export interface InterviewQuestion {
   skills: string[]
   expectedDuration: number // in seconds
   category: string
+  framework?: string
 }
 
 export interface AnswerAnalysis {
@@ -52,6 +53,7 @@ export interface AnswerAnalysis {
     pacing: string
   }
   processingTime: number
+  framework?: string
 }
 
 export interface AnalysisRequest {
@@ -129,6 +131,165 @@ SCORING CRITERIA:
 - Confidence: Perceived conviction and assertiveness
 
 Return ONLY the JSON object, no additional text.`
+  }
+
+  /**
+   * Generate static analysis based on framework and metrics
+   * Used for voice section practice without calling AI APIs
+   */
+  generateStaticAnalysis(request: AnalysisRequest): AnswerAnalysis {
+    const { question, transcript, audioDuration } = request
+    const framework = question.framework || 'STAR'
+    const wordCount = transcript.split(/\s+/).filter(w => w.length > 0).length
+    const wpm = Math.round((wordCount / audioDuration) * 60)
+
+    // Base scores
+    let clarity = 85
+    let relevance = 90
+    let structure = 80
+    let completeness = 75
+    let confidence = 85
+
+    // Adjust scores based on metrics
+    if (audioDuration < 30) completeness -= 30
+    if (wpm < 100) clarity -= 10
+    if (wpm > 200) clarity -= 15
+    if (wordCount < 40) relevance -= 20
+
+    const overallScore = Math.round((clarity + relevance + structure + completeness + confidence) / 5)
+
+    // Framework specific feedback
+    const frameworkFeedback: Record<string, any> = {
+      'STAR': {
+        strengths: [
+          'Excellent use of the Situation-Task-Action-Result structure',
+          'Quantified results provided a clear sense of impact',
+          'The Action phase demonstrated strong individual contribution',
+          'Well-defined context that made the response easy to follow',
+          'Appropriate level of detail without becoming overly verbose'
+        ],
+        weaknesses: [
+          'The transition from Task to Action could be smoother',
+          'Consider providing more detail on the specific "How" of the actions',
+          'The result could be linked more directly back to the original problem',
+          'Avoid using too much technical jargon in the Situation phase'
+        ],
+        suggestions: [
+          'Spend less time on Context (approx 10%) and more on Action (60%)',
+          'Use "I" instead of "We" to clearly claim your contributions',
+          'Add a "Lesson Learned" at the end for extra depth',
+          'Try to use stronger action verbs to describe your interventions',
+          'Ensure the Situation sets a high-stakes tone to make the Result more impressive'
+        ],
+        detailed: `Your response followed the STAR (Situation, Task, Action, Result) method effectively. You established a clear context and showed exactly how you intervened. To improve, try to spend 60% of your time on the Action and Result phases, as these demonstrate your skills most clearly. Your delivery was confident and well-paced.`
+      },
+      'CAR': {
+        strengths: [
+          'Immediate focus on the Context allowed for a punchy opening',
+          'Action sequence was logical and easy to visualize',
+          'Results were concisely summarized and impact-oriented',
+          'Great balance between technical skills and soft skills',
+          'Response remained focused on the core objective throughout'
+        ],
+        weaknesses: [
+          'The Context phase felt slightly rushed',
+          'More emphasis on the specific obstacles faced would be beneficial',
+          'Could elaborate more on the collaboration aspect during the Action phase',
+          'The Result stage could benefit from a long-term perspective'
+        ],
+        suggestions: [
+          'Elaborate on the tools or strategies used during the Action phase',
+          'Make sure to mention the long-term impact of the Results',
+          'Quantify the scope of the Context to set a better stage',
+          'Connect the Result back to the initial challenge more explicitly',
+          'Use professional vocabulary consistently throughout the narrative'
+        ],
+        detailed: `Great job using the CAR (Context, Action, Result) framework. Your delivery was structured and focused on outcomes. For your next practice, try to highlight the "why" behind your actions to show deeper strategic thinking and problem-solving maturity.`
+      },
+      'PAR': {
+        strengths: [
+          'The Problem statement was compelling and clear',
+          'Action steps showed high degree of initiative and ownership',
+          'Resolution was positive, professional, and definitive',
+          'Demonstrated excellent critical thinking skills',
+          'Strong narrative arc from challenge to success'
+        ],
+        weaknesses: [
+          'The complexity of the problem could be further emphasized',
+          'Some Action steps were a bit generic',
+          'The link between Action and Resolution could be tightened',
+          'Consider mentioning any trade-offs made during the process'
+        ],
+        suggestions: [
+          'Dig deeper into the specific steps taken to solve the problem',
+          'Highlight any unique innovations you brought to the task',
+          'Explicitly state the "Resolution" to ensure it lands with the listener',
+          'Provide a short reflection on what this experience taught you',
+          'Maintain a consistent pace, especially during the more technical Action phase'
+        ],
+        detailed: `You successfully utilized the PAR (Problem, Action, Resolution) framework. Your response was solution-oriented and demonstrated strong ownership. Try to mention what you learned from this problem-solving experience to add more depth and show a growth mindset.`
+      },
+      'PREP': {
+        strengths: [
+          'Point was stated clearly at the beginning and end',
+          'Reasons provided were logical and persuasive',
+          'Example was highly relevant and illustrated the point well',
+          'Excellent conciseness and punchy delivery',
+          'Very easy to follow for a general audience'
+        ],
+        weaknesses: [
+          'The Example could be more detailed to build more credibility',
+          'The transition from Reason to Example was a bit fast',
+          'The "Summary Point" was slightly different from the "Opening Point"'
+        ],
+        suggestions: [
+          'Ensure the opening Point is a bold statement of your position',
+          'Use "For instance" or "Specifically" to introduce your Example',
+          'Restate your Point exactly at the end for maximum retention',
+          'Link the Reason to a broader benefit or company goal',
+          'Keep the narrative focused strictly on the single point you are making'
+        ],
+        detailed: `Your answer followed the PREP (Point, Reason, Example, Point) framework, making it very persuasive. This is an ideal structure for quick updates or handling Q&A. To improve further, ensure your example is as specific as possible with names or numbers.`
+      }
+    }
+
+    const currentFeedback = frameworkFeedback[framework] || frameworkFeedback['STAR']
+
+    // Additional generic feedback based on performance
+    const extraStrengths = []
+    if (wpm >= 130 && wpm <= 160) extraStrengths.push('Excellent pacing and speech rhythm')
+    if (wordCount > 100) extraStrengths.push('Comprehensive coverage of the topic')
+    if (confidence > 80) extraStrengths.push('Projected strong vocal confidence')
+    if (clarity > 85) extraStrengths.push('Very clear pronunciation and articulation')
+
+    return {
+      overallScore,
+      transcript,
+      framework: framework,
+      feedback: {
+        strengths: [...currentFeedback.strengths, ...extraStrengths].slice(0, 6),
+        weaknesses: [...currentFeedback.weaknesses, wordCount < 30 ? 'Response length is significantly below recommendation' : ''].filter(Boolean),
+        suggestions: currentFeedback.suggestions,
+        detailedFeedback: currentFeedback.detailed
+      },
+      scores: {
+        clarity,
+        relevance,
+        structure,
+        completeness,
+        confidence
+      },
+      keyPoints: {
+        covered: question.skills.slice(0, Math.ceil(question.skills.length * (relevance / 100))),
+        missed: question.skills.slice(Math.ceil(question.skills.length * (relevance / 100)))
+      },
+      timeManagement: {
+        duration: audioDuration,
+        efficiency: audioDuration > 45 ? 'excellent' : 'good',
+        pacing: wpm < 120 ? 'Deliberate and clear' : wpm > 170 ? 'Fast-paced' : 'Balanced and natural'
+      },
+      processingTime: 500
+    }
   }
 
   /**

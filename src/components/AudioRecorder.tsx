@@ -35,6 +35,7 @@ interface AudioRecorderProps {
   autoStop?: boolean // auto-stop when max duration reached
   className?: string
   showTranscription?: boolean // whether to display the transcription text (default: true)
+  useStaticAnalysis?: boolean // whether to use static feedback instead of AI API
 }
 
 type RecordingState = 'idle' | 'recording' | 'paused' | 'stopped' | 'processing' | 'completed'
@@ -46,7 +47,8 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   maxDuration = 300,
   autoStop = true,
   className = '',
-  showTranscription = true
+  showTranscription = true,
+  useStaticAnalysis = false
 }) => {
   // Recording state management
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
@@ -395,13 +397,29 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
       console.log('✅ Transcription successful:', transcription.transcript)
 
-      // Step 2: Analyze transcription with AI (Gemini or OpenAI based on env)
-      const analysis = await geminiAnalysisService.analyzeAnswer({
-        transcript: transcription.transcript,
-        question: question,
-        audioDuration: duration,
-        transcriptionConfidence: transcription.confidence
-      })
+      console.log('✅ Transcription successful:', transcription.transcript)
+
+      // Step 2: Analyze transcription
+      let analysis
+      if (useStaticAnalysis) {
+        console.log('📝 Using static analysis generator...')
+        analysis = geminiAnalysisService.generateStaticAnalysis({
+          transcript: transcription.transcript,
+          question: question,
+          audioDuration: duration,
+          transcriptionConfidence: transcription.confidence
+        })
+        // Mock processing delay for realism
+        await new Promise(resolve => setTimeout(resolve, 800))
+      } else {
+        console.log('🤖 Calling Gemini AI for analysis...')
+        analysis = await geminiAnalysisService.analyzeAnswer({
+          transcript: transcription.transcript,
+          question: question,
+          audioDuration: duration,
+          transcriptionConfidence: transcription.confidence
+        })
+      }
 
       onAnalysisComplete?.(analysis)
       setRecordingState('completed')
