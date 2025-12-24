@@ -27,4 +27,4 @@ export const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope('email')
 googleProvider.addScope('profile')
 
-export default app
+export default app;
