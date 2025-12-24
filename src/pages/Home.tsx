@@ -265,7 +265,7 @@ export default function Home() {
           </div>
         </section>
         {/* Trust Strip */}
-        <TrustStrip variant="light" />
+        <TrustStrip />
 
         {/* Solution Features Section */}
         <SolutionFeatures />
